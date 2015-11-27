@@ -11,6 +11,7 @@ void InitAdminCommandList()
 
 	if (hInstance)
 	{
+		int i = 0;
 		for (int i = 0; i < _MAX_ADMINCOMMAND_LIST; i++)
 		{
 			LoadString(hInstance, IDS_COMMAND_MONGEN + i, szCommand, sizeof(szCommand)/sizeof(TCHAR));

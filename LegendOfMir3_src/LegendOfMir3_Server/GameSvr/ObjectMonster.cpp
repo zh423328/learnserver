@@ -1562,7 +1562,7 @@ CScultureKingObject::CScultureKingObject()
 void CScultureKingObject::CallSlave()
 {
 	static const int MaxSlaveList = 4;
-	static SlaveList[MaxSlaveList] = { 143/*마궁사*/, 145/*주마신장*/, 148/* 주마호법 */, 126/*쐐기나방*/ };
+	static int SlaveList[MaxSlaveList] = { 143/*마궁사*/, 145/*주마신장*/, 148/* 주마호법 */, 126/*쐐기나방*/ };
 
 	int				nCount = 6 + (rand() % 6);
 	int				nMonRace;

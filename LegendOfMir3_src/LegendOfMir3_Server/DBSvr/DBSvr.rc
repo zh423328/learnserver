@@ -1,4 +1,4 @@
-//Microsoft Developer Studio generated resource script.
+// Microsoft Visual C++ generated resource script.
 //
 #include "resource.h"
 
@@ -13,46 +13,18 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// Korean resources
+// Chinese (Simplified, PRC) resources
 
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
-#ifdef _WIN32
-LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
-#pragma code_page(949)
-#endif //_WIN32
-
-#ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// TEXTINCLUDE
-//
-
-1 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "resource.h\0"
-END
-
-2 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "#include ""afxres.h""\r\n"
-    "\0"
-END
-
-3 TEXTINCLUDE DISCARDABLE 
-BEGIN
-    "\r\n"
-    "\0"
-END
-
-#endif    // APSTUDIO_INVOKED
-
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Bitmap
 //
 
-IDB_TOOLBAR             BITMAP  DISCARDABLE     ".\\Res\\toolbar.bmp"
+IDB_TOOLBAR             BITMAP                  ".\\Res\\toolbar.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -61,14 +33,14 @@ IDB_TOOLBAR             BITMAP  DISCARDABLE     ".\\Res\\toolbar.bmp"
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_MIR2                ICON    DISCARDABLE     ".\\Res\\MIR2.ICO"
+IDI_MIR2                ICON                    ".\\Res\\MIR2.ICO"
 
 /////////////////////////////////////////////////////////////////////////////
 //
 // Menu
 //
 
-IDR_MAINMENU MENU DISCARDABLE 
+IDR_MAINMENU MENU
 BEGIN
     POPUP "&Service"
     BEGIN
@@ -87,15 +59,14 @@ END
 // Dialog
 //
 
-IDD_CONFIGDLG DIALOG DISCARDABLE  0, 0, 187, 143
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+IDD_CONFIGDLG DIALOG 0, 0, 187, 143
+STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Database Server Configuration"
-FONT 9, "奔覆"
+FONT 9, "??"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,71,122,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,130,122,50,14
-    CONTROL         "IPAddress1",IDC_DBMS_IP,"SysIPAddress32",WS_TABSTOP,65,
-                    29,90,11
+    CONTROL         "IPAddress1",IDC_DBMS_IP,"SysIPAddress32",WS_TABSTOP,65,29,90,11
     EDITTEXT        IDC_DBMS_PORT,65,43,28,12,ES_AUTOHSCROLL | ES_NUMBER
     LTEXT           "Address :",-1,29,31,35,8
     GROUPBOX        "DBMS Information",-1,15,15,158,83
@@ -103,8 +74,7 @@ BEGIN
     LTEXT           "ID : ",-1,30,81,14,8
     EDITTEXT        IDC_DBMS_ID,46,78,28,14,ES_AUTOHSCROLL
     LTEXT           "Password :",-1,82,81,38,8
-    EDITTEXT        IDC_DBMS_PASSWORD,123,78,40,14,ES_PASSWORD | 
-                    ES_AUTOHSCROLL
+    EDITTEXT        IDC_DBMS_PASSWORD,123,78,40,14,ES_PASSWORD | ES_AUTOHSCROLL
     LTEXT           "Database :",-1,25,60,36,8
     EDITTEXT        IDC_DBMS_DEVICE,65,58,82,14,ES_AUTOHSCROLL
 END
@@ -116,7 +86,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO
 BEGIN
     IDD_CONFIGDLG, DIALOG
     BEGIN
@@ -134,39 +104,75 @@ END
 // String Table
 //
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
-    IDS_NOTWINNT            "捞 橇肺弊伐篮 Microsoft Windows 2000 捞惑狼 滚怜俊辑 父 角青 且 荐 乐嚼聪促."
-    IDS_LVS_LABEL1          "朝楼"
-    IDS_LVS_LABEL2          "矫埃"
-    IDS_LVS_LABEL3          "皋技瘤"
-    IDS_STARTSERVICE        "单捞磐海捞胶 辑滚 辑厚胶甫 矫累 沁嚼聪促."
-    IDS_STOPSERVICE         "单捞磐海捞胶 辑滚 辑厚胶甫 吝瘤 沁嚼聪促."
-    IDS_CONNECT_LOGINSERVER "伎泛飘 霸捞飘 辑滚客 立加 登菌嚼聪促."
-    IDS_DISCONNECT_LOGINSERVER "肺弊牢 辑滚客 立加捞 谗板嚼聪促."
-    IDS_PROGRAM_QUIT        "单捞磐海捞胶 辑滚甫 辆丰 窍矫摆嚼聪鳖 ?"
-    IDS_PROGRAM_TITLE       "固福狼 傈汲2 - 肺弊牢 辑滚"
-    IDS_CANT_CONNECT        "肺弊牢 辑滚俊 立加 且 荐 绝嚼聪促. 10檬 饶 犁 立加阑 矫档 钦聪促."
-    IDS_CONFLVS_LABEL1      "辑滚疙"
-    IDS_CONFLVS_LABEL2      "鸥捞撇"
-    IDS_CONFLVS_LABEL3      "肺弊牢 霸捞飘 郴何 IP 林家"
-    IDS_CONFLVS_LABEL4      "肺弊牢 霸捞飘 寇何 IP 林家"
+    IDS_NOTWINNT            "这个项目是不是Windows 2000以上的版本上运行"
+    IDS_LVS_LABEL1          "日期"
+    IDS_LVS_LABEL2          "时间"
+    IDS_LVS_LABEL3          "信息"
+    IDS_STARTSERVICE        "开启服务器"
+    IDS_STOPSERVICE         "关闭服务器"
+    IDS_CONNECT_LOGINSERVER "连接登录服务器"
+    IDS_DISCONNECT_LOGINSERVER "断开登陆服务器"
+    IDS_PROGRAM_QUIT        "是否关闭服务器？"
+    IDS_PROGRAM_TITLE       "DBSrv"
+    IDS_CANT_CONNECT        "登陆服务器无法连接，10秒后重试？"
+    IDS_CONFLVS_LABEL1      "服务器名"
+    IDS_CONFLVS_LABEL2      "标题"
+    IDS_CONFLVS_LABEL3      "登陆内部IP地址"
+    IDS_CONFLVS_LABEL4      "登陆外部IP地址"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE
 BEGIN
-    IDS_CONFLVS_LABEL5      "霸烙 霸捞飘 寇何 IP 林家"
-    IDS_TAB_LABEL1          "辑滚 汲沥"
-    IDS_ACCEPT_GATESERVER   "霸烙 辑滚 (%s) 啊 立加 登菌嚼聪促."
-    IDS_OPEN_USER           "努扼捞攫飘 (%s) 啊 立加阑 矫档 沁嚼聪促. "
-    IDS_CLOSE_USER          "努扼捞攫飘 (%s) 啊 立加阑 辆丰 沁嚼聪促."
-    IDS_CONNECTDB           "固福狼 傈汲 2 单捞磐海捞胶俊 立加 登菌嚼聪促."
-    IDS_LOADACCOUNTRECORDS  "荤侩磊 拌沥 沥焊 饭内靛甫 佬绰 吝涝聪促."
-    IDS_BOUNDACCOUNTRECORDS "%d 俺狼 荤侩磊 拌沥 沥焊 饭内靛甫 佬菌嚼聪促."
-    IDS_COMPLETENEWUSER     "荤侩磊 ID [ %s ] 甫 积己 沁嚼聪促."
+    IDS_CONFLVS_LABEL5      "游戏的外部地址"
+    IDS_TAB_LABEL1          "服务器设置"
+    IDS_ACCEPT_GATESERVER   "游戏服务器(%s)连接"
+    IDS_OPEN_USER           "客户端(%s)连接"
+    IDS_CLOSE_USER          "客户端（% s）关闭服务器"
+    IDS_CONNECTDB           "连接数据库"
+    IDS_LOADACCOUNTRECORDS  "用户账户的信息记录"
+    IDS_BOUNDACCOUNTRECORDS "% d个用户帐户信息记录读出了"
+    IDS_COMPLETENEWUSER     "[%s]用户ID创建"
 END
 
-#endif    // Korean resources
+#endif    // Chinese (Simplified, PRC) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Korean (Korea) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Korean (Korea) resources
 /////////////////////////////////////////////////////////////////////////////
 
 

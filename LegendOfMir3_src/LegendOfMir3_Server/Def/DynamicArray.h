@@ -70,7 +70,7 @@ template <class T> int CWHDynamicArray<T>::GetAvailablePosition()
 			return i;
 	}
 
-	for (i = 0; i < m_nLastInsertIndex; i++)
+	for (int i = 0; i < m_nLastInsertIndex; i++)
 	{
 		if (m_IsAvElements[i] == FALSE)
 			return i;

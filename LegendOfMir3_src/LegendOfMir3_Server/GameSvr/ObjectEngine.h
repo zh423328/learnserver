@@ -379,7 +379,7 @@ public:
 
 	CCharObject*	GetFrontObject();
 
-	__inline SysMsg(char *pszMsg, int nMode) 
+	__inline void SysMsg(char *pszMsg, int nMode) 
 		{ ( nMode == 1 ? AddProcess(this, RM_SYSMESSAGE2, 0, 0, 0, 0, pszMsg) : AddProcess(this, RM_SYSMESSAGE, 0, 0, 0, 0, pszMsg)); }
 	__inline LONG GetFeatureToLong()
 		{ return (LONG) MAKELONG(MAKEWORD(m_tFeature.btGender, m_tFeature.btWear), MAKEWORD(m_tFeature.btHair, m_tFeature.btWeapon)); }

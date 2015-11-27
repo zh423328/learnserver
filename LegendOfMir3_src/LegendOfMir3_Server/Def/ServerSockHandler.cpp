@@ -71,10 +71,8 @@ BOOL InitServerSocket(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, int nPort, long
 #ifdef _SOCKET_OVERLAPPED_IO
 		if ((WSAAsyncSelect(s, g_hMainWnd, nMsgID, lEvent)) == SOCKET_ERROR)
 			return FALSE;
-#else
-//		CreateIOCPWorkerThread((int)lEvent);				  
-		CreateIOCPWorkerThread((int)1);	
-//		InitServerThreadForMsg();
+#else				  
+		CreateIOCPWorkerThread((int)1);	;
 
 		if (!InitThread(AcceptThread))
 			return FALSE;

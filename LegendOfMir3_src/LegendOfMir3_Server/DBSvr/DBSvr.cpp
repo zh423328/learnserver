@@ -4,6 +4,13 @@
 #include "stdafx.h"
 #include "../def/dbmgr.h"
 #include "TableList.h"
+#include "../Common/DBManager.h"
+
+#ifdef _DEBUG 
+#pragma comment(lib,"Common_d.lib")
+#else
+#pragma comment(lib,"Common.lib")
+#endif
 
 #define _BMP_CX				16
 #define _BMP_CY				16
@@ -162,7 +169,7 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 	lvc.cx		= 100;
 	lvc.pszText	= szText;
 
-	for (i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		lvc.iSubItem = i;
 		LoadString((HINSTANCE)hInstance, IDS_LVS_LABEL1 + i, szText, sizeof(szText));
@@ -181,25 +188,28 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 
 	BYTE	btInstalled;
 
-	if (!jRegGetKey(_DB_SERVER_REGISTRY, _TEXT("Installed"), (LPBYTE)&btInstalled))
-		DialogBox(g_hInst, MAKEINTRESOURCE(IDD_CONFIGDLG), NULL, (DLGPROC)ConfigDlgFunc);
+	//×¢²á±í
+	//if (!jRegGetKey(_DB_SERVER_REGISTRY, _TEXT("Installed"), (LPBYTE)&btInstalled))
+	//	DialogBox(g_hInst, MAKEINTRESOURCE(IDD_CONFIGDLG), NULL, (DLGPROC)ConfigDlgFunc);
 
-	TCHAR	wszDatabase[256];
-	char	szDatabase[256];
+	//TCHAR	wszDatabase[256];
+	//char	szDatabase[256];
 
-	jRegGetKey(_DB_SERVER_REGISTRY, _TEXT("Device"), (LPBYTE)wszDatabase);
-	WideCharToMultiByte(CP_ACP, 0, wszDatabase, -1, szDatabase, sizeof(szDatabase), NULL, NULL);
+	//jRegGetKey(_DB_SERVER_REGISTRY, _TEXT("Device"), (LPBYTE)wszDatabase);
+	//WideCharToMultiByte(CP_ACP, 0, wszDatabase, -1, szDatabase, sizeof(szDatabase), NULL, NULL);
 
-	GetDBManager()->Init( InsertLogMsg, szDatabase, "sa", "prg" );
-
-	// Å×ÀÌºí ÀÐ±â
-	CConnection *pConn = GetDBManager()->m_dbMain.CreateConnection( "Mir2_Common", "sa", "prg" );
-	if ( pConn )
-	{
-		if ( !GetTblStartPoint()->Init( pConn ) )
-			InsertLogMsg( _T("failed to read TBL_STARTPOINT table\n") );
-	}
-	GetDBManager()->m_dbMain.DestroyConnection( pConn );
+	DBManager::GetInstance().Initialize("127.0.0.1",3306,"kbe","kbe","LegendofMir",4);
+	//GetDBManager()->Init( InsertLogMsg, szDatabase, "sa", "prg" );
+	//
+	//
+	////Êý¾Ý¿âÁ¬½Ó
+	//CConnection *pConn = GetDBManager()->m_dbMain.CreateConnection( "Mir2_Common", "sa", "prg" );
+	//if ( pConn )
+	//{
+	//	if ( !GetTblStartPoint()->Init( pConn ) )
+	//		InsertLogMsg( _T("failed to read TBL_STARTPOINT table\n") );
+	//}
+	//GetDBManager()->m_dbMain.DestroyConnection( pConn );
 
 	return TRUE;
 }

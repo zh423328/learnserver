@@ -66,26 +66,26 @@ void LoadCharacterRecords()
 {
 	InsertLogMsg(IDS_LOADACCOUNTRECORDS);
 
-	CRecordset *pRec = GetDBManager()->CreateRecordset();
-	if ( pRec->Execute( "SELECT * FROM TBL_GAMEGATEINFO" ) )
-	{
-		GAMESERVERINFO *pServerInfo;
+	//CRecordset *pRec = GetDBManager()->CreateRecordset();
+	//if ( pRec->Execute( "SELECT * FROM TBL_GAMEGATEINFO" ) )
+	//{
+	//	GAMESERVERINFO *pServerInfo;
 
-		while ( pRec->Fetch() )
-		{
-			pServerInfo = new GAMESERVERINFO;
-			if ( !pServerInfo )
-				break;
+	//	while ( pRec->Fetch() )
+	//	{
+	//		pServerInfo = new GAMESERVERINFO;
+	//		if ( !pServerInfo )
+	//			break;
 
-			pServerInfo->index = atoi( pRec->Get( "FLD_SERVERIDX" ) );
-			strcpy( pServerInfo->name, pRec->Get( "FLD_SERVERNAME" ) );
-			strcpy( pServerInfo->ip,   pRec->Get( "FLD_SERVERIP" ) );
-			pServerInfo->connCnt = 0;
+	//		pServerInfo->index = atoi( pRec->Get( "FLD_SERVERIDX" ) );
+	//		strcpy( pServerInfo->name, pRec->Get( "FLD_SERVERNAME" ) );
+	//		strcpy( pServerInfo->ip,   pRec->Get( "FLD_SERVERIP" ) );
+	//		pServerInfo->connCnt = 0;
 
-			g_xGameServerList.AddNewNode( pServerInfo );
-		}
-	}
-	GetDBManager()->DestroyRecordset( pRec );
+	//		g_xGameServerList.AddNewNode( pServerInfo );
+	//	}
+	//}
+	//GetDBManager()->DestroyRecordset( pRec );
 }
 
 void OnCommand(WPARAM wParam, LPARAM lParam)

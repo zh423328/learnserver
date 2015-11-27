@@ -169,7 +169,7 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 	lvc.cx		= 150;
 	lvc.pszText	= szText;
 
-	for (i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		lvc.iSubItem = i;
 		LoadString((HINSTANCE)hInstance, IDS_LVS_LABEL1 + i, szText, sizeof(szText)/sizeof(TCHAR));
