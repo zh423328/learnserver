@@ -51,7 +51,7 @@ BOOL InitServerSocket(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, int nPort, long
 #ifdef _SOCKET_ASYNC_IO
 		s = socket(AF_INET, SOCK_STREAM, 0);
 #else
-		s = WSASocketA(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+		s = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
 #endif
 
 		addr->sin_family		= AF_INET;
@@ -117,7 +117,7 @@ BOOL ClearSocket(SOCKET &s)
 //
 // **************************************************************************************
 
-BOOL ConnectToServer(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, LPCTSTR lpServerIP, DWORD dwIP, int nPort, long lEvent)
+BOOL ConnectToServer(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, const char* lpServerIP, DWORD dwIP, int nPort, long lEvent)
 {
 	if (s != INVALID_SOCKET)
 	{
@@ -132,10 +132,7 @@ BOOL ConnectToServer(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, LPCTSTR lpServer
 	
 	if (lpServerIP)
 	{
-		char szIP[24];
-
-		WideCharToMultiByte(CP_ACP, 0, lpServerIP, -1, szIP, sizeof(szIP), NULL, NULL);
-		addr->sin_addr.s_addr	= inet_addr(szIP);
+		addr->sin_addr.s_addr	= inet_addr(lpServerIP);
 	}
 	else
 	{
@@ -233,15 +230,6 @@ BOOL CheckSocketError(LPARAM lParam)
 #ifndef _SOCKET_ASYNC_IO
 BOOL CheckAvailableIOCP()
 {
-	//OSVERSIONINFO VersionInfo;
-
-	//GetVersionEx(&VersionInfo);
-
-	//if (VersionInfo.dwPlatformId == VER_PLATFORM_WIN32_NT && VersionInfo.dwMajorVersion >= 5)
-	//	return TRUE;
-
-	//return FALSE;
-
 	return TRUE;
 }
 

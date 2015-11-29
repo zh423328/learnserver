@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="Common.cpp" />
+    <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="DBServer.cpp" />
+    <ClCompile Include="format.cpp" />
+    <ClCompile Include="MySqlCmd.cpp" />
+    <ClCompile Include="MysqlDB.cpp" />
+    <ClCompile Include="MySqlQuery.cpp" />
+    <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="threadpool.cpp" />
+    <ClCompile Include="DBProtect.cpp">
+      <Filter>DBProctect</Filter>
+    </ClCompile>
+    <ClCompile Include="DBOperation.cpp">
+      <Filter>DBProctect</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerConfig.cpp">
+      <Filter>Config</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common.h" />
+    <ClInclude Include="DBManager.h" />
+    <ClInclude Include="DBServer.h" />
+    <ClInclude Include="format.h" />
+    <ClInclude Include="mutex.h" />
+    <ClInclude Include="MysqlDB.h" />
+    <ClInclude Include="platform.h" />
+    <ClInclude Include="pool.h" />
+    <ClInclude Include="rapidxml.hpp" />
+    <ClInclude Include="rapidxml_iterators.hpp" />
+    <ClInclude Include="rapidxml_print.hpp" />
+    <ClInclude Include="rapidxml_utils.hpp" />
+    <ClInclude Include="singleton.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="task.h" />
+    <ClInclude Include="threadpool.h" />
+    <ClInclude Include="threadtask.h" />
+    <ClInclude Include="DBProtect.h">
+      <Filter>DBProctect</Filter>
+    </ClInclude>
+    <ClInclude Include="ServerConfig.h">
+      <Filter>Config</Filter>
+    </ClInclude>
+    <ClInclude Include="Packet.h">
+      <Filter>Packet</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="threadpool.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="DBProctect">
+      <UniqueIdentifier>{97924f45-0852-4066-8284-26fefc62ee83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Config">
+      <UniqueIdentifier>{d9f237ab-42c2-4ea8-b4ff-24bdc80f32ba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Packet">
+      <UniqueIdentifier>{a13b1438-071c-4518-8020-5aa88d364669}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

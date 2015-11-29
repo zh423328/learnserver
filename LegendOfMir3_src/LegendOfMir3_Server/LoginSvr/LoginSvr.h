@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Common/Packet.h"
+
 #define PACKET_KEEPALIVE				"%++$"
 
 #define LOGPARAM_STR			1
@@ -55,8 +57,10 @@ public:
 	void	ProcSelectServer(SOCKET s, WORD wServerIndex);
 
 	void	Close();
-
-	__inline void SendKeepAlivePacket() { send(sock, PACKET_KEEPALIVE, sizeof(PACKET_KEEPALIVE), 0); }
+	
+	void	SendToGate(char * szData,int nLen);
+	
+	__inline void SendKeepAlivePacket() { SendToGate(PACKET_KEEPALIVE, strlen(PACKET_KEEPALIVE)); }
 
 	CGateInfo()
 	{
@@ -74,16 +78,26 @@ public:
 
 		return WSARecv( sock, &DataBuf, 1, &nRecvBytes, &nFlags, &Overlapped, 0 );
 	}
-
+	//是否有个完整的包
 	bool HasCompletionPacket()
 	{
-		return memchr( Buffer, '$', bufLen ) ? true : false;
+		//return memchr( Buffer, '!', bufLen ) ? true : false;
+		if (bufLen >= PHLen)	//包头长度
+		{
+			return true;
+		}
+		else
+			return false;
 	}
 
-	// recv 滚欺俊辑 肯己等 窍唱狼 菩哦阑 惶酒辰促.
+	// recv 展开包
 	char * ExtractPacket( char *pPacket )
 	{
-		int packetLen = (char *) memchr( Buffer, '$', bufLen ) - Buffer + 1;
+		Packet *pHavePacket = (Packet*)Buffer;
+		if (pPacket== NULL)
+			return NULL;
+
+		int packetLen = pHavePacket->tlen;	//包长度
 
 		memcpy( pPacket, Buffer, packetLen );
 

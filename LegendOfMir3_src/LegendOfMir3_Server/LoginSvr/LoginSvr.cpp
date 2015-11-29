@@ -3,6 +3,15 @@
 
 #include "stdafx.h"
 #include "../def/dbmgr.h"
+#include "../Common/ServerConfig.h"
+#include "../Common/DBManager.h"
+#include "AccountManager.h"
+
+#ifdef _DEBUG
+#pragma comment(lib,"Common_d.lib")
+#else
+#pragma comment(lib,"Common.lib")
+#endif
 
 #define _BMP_CX				16
 #define _BMP_CY				16
@@ -19,6 +28,12 @@ BOOL	jRegGetKey(LPCTSTR pSubKeyName, LPCTSTR pValueName, LPBYTE pValue);
 BOOL	CALLBACK ConfigDlgFunc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
 void	CreateConfigProperties();
+
+bool	LoadConfig();
+
+bool	LoadAccoutUser();
+
+//加载玩家
 
 // **************************************************************************************
 //
@@ -48,30 +63,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
     MSG msg;
 
-//	if (CheckAvailableIOCP())
-//	{
-		if (!InitApplication(hInstance))
-			return (FALSE);
+	//加载配置
+	if (!LoadConfig())
+		return FALSE;
 
-		if (!InitInstance(hInstance, nCmdShow))
-			return (FALSE);
+	if (!InitApplication(hInstance))
+		return (FALSE);
 
-		while (GetMessage(&msg, NULL, 0, 0))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-/*	}
-	else
+	if (!InitInstance(hInstance, nCmdShow))
+		return (FALSE);
+
+	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		TCHAR szMsg[1024];
-
-		LoadString(hInstance, IDS_NOTWINNT, szMsg, sizeof(szMsg));
-		MessageBox(NULL, szMsg, _LOGINGATE_SERVER_TITLE, MB_OK|MB_ICONINFORMATION);
-		
-		return -1;
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
-*/
+
     return (msg.wParam);
 }
 
@@ -192,6 +199,23 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 //	if (!jRegGetKey(_LOGIN_SERVER_REGISTRY, _TEXT("Installed"), (LPBYTE)&btInstalled))
 //		CreateConfigProperties();
 
+	ENGINE_COMPONENT_INFO info = g_SeverConfig.getLoginSrvInfo();
+	
+	//连接数据库
+	if (info.dbip.length()&&info.dbport&&info.dbuser.length() &&info.dbpwd.length())
+	{
+		 bool bRet = DBManager::GetInstance().Initialize(info.dbip.c_str(),info.dbport,info.dbuser.c_str(),
+			info.dbpwd.c_str(),info.dbname.c_str(),info.dbconnectcnt);
+
+		 if (bRet == false)
+			 return FALSE;
+	}
+
+	//添加任务查找
+	bool bRet = LoadAccoutUser();
+	if (bRet == false)
+		return FALSE;
+
 	InvalidateRect( g_hMainWnd, NULL, TRUE );
 
 	return TRUE;
@@ -283,5 +307,44 @@ void InsertLogMsgParam(UINT nID, void *pParam, BYTE btFlags)
 		ListView_SetItemText(g_hLogMsgWnd, nCount, 2, szMsg);
 		ListView_Scroll(g_hLogMsgWnd, 0, 8);
 	}
+}
+
+
+bool LoadConfig()
+{
+	return g_SeverConfig.LoadServerConfig("ServersConfig.xml");
+}
+
+bool LoadAccoutUser()
+{
+	//加载玩家
+	DBServer *pDBServer = DBManager::GetInstance().GetFreeCon();
+	if (pDBServer== NULL)
+		return false;
+
+	QueryRlt rlt;
+
+	bool ret = pDBServer->Query(&rlt,"select * from userlist");
+	if (ret)
+	{
+		MySqlQuery* pCmd = rlt.GetRlt();
+		if(pCmd != NULL)
+		{
+			while(pCmd->FetchRow())
+			{
+				AccountUser*pUser = new AccountUser();
+				pUser->m_uin = pCmd->GetInt("uin");
+				strcpy(pUser->m_id,pCmd->GetStr("id"));
+				strcpy(pUser->m_pwd,pCmd->GetStr("pwd"));
+				pUser->m_bOnLine = false;
+
+				AccoutManager::GetInstance().InsertAccountUser(pUser);
+			}	
+		}
+
+		return true;
+	}
+
+	return false;
 }
 

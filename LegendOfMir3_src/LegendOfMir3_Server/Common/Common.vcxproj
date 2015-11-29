@@ -42,6 +42,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>$(ProjectName)_d</TargetName>
+    <IntDir>.\../_Obj_Debug/Common\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,16 +87,19 @@
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="DBManager.h" />
+    <ClInclude Include="DBProtect.h" />
     <ClInclude Include="DBServer.h" />
     <ClInclude Include="format.h" />
     <ClInclude Include="mutex.h" />
     <ClInclude Include="MysqlDB.h" />
+    <ClInclude Include="Packet.h" />
     <ClInclude Include="platform.h" />
     <ClInclude Include="pool.h" />
     <ClInclude Include="rapidxml.hpp" />
     <ClInclude Include="rapidxml_iterators.hpp" />
     <ClInclude Include="rapidxml_print.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
+    <ClInclude Include="ServerConfig.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -106,11 +110,14 @@
   <ItemGroup>
     <ClCompile Include="Common.cpp" />
     <ClCompile Include="DBManager.cpp" />
+    <ClCompile Include="DBOperation.cpp" />
+    <ClCompile Include="DBProtect.cpp" />
     <ClCompile Include="DBServer.cpp" />
     <ClCompile Include="format.cpp" />
     <ClCompile Include="MySqlCmd.cpp" />
     <ClCompile Include="MysqlDB.cpp" />
     <ClCompile Include="MySqlQuery.cpp" />
+    <ClCompile Include="ServerConfig.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>

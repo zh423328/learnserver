@@ -84,6 +84,8 @@ bool DBTask::process()
 					}
 					else
 					{
+						//执行失败的话，添加到数据记录里面
+						m_pServer->Proctect(m_szCmd,NULL,0);
 						state = thread::TPTask::TPTASK_STATE_COMPLETED;
 						DBManager::GetInstance().ReleaseCon(m_pServer);
 					}
@@ -109,6 +111,9 @@ bool DBTask::process()
 						}
 						else
 						{
+							//执行失败的话，添加到数据记录里面
+							m_pServer->Proctect(m_szCmd,(char*)m_pData,m_nLen);
+
 							state = thread::TPTask::TPTASK_STATE_COMPLETED;
 							DBManager::GetInstance().ReleaseCon(m_pServer);
 						}

@@ -1,4 +1,7 @@
 #include "stdafx.h"
+#include "../Common/ServerConfig.h"
+
+
 
 LPARAM OnServerSockMsg(WPARAM wParam, LPARAM lParam);
 LPARAM OnClientSockMsg(WPARAM wParam, LPARAM lParam);
@@ -87,18 +90,22 @@ void OnCommand(WPARAM wParam, LPARAM lParam)
 
 			g_fTerminated = FALSE;
 		
-			if (!jRegGetKey(_LOGINGATE_SERVER_REGISTRY, _TEXT("LocalPort"), (LPBYTE)&nPort))
-				nPort = 7000;
+			//初始化等待ip
+			ENGINE_COMPONENT_INFO info = g_SeverConfig.getLoginGateInfo();
+			
+			nPort = info.extport?info.extport:7000;
 
+			
 			//初始化完成端口
 			InitServerSocket(g_ssock, &g_saddr, _IDM_SERVERSOCK_MSG, nPort, FD_ACCEPT);
 
-			jRegGetKey(_LOGINGATE_SERVER_REGISTRY, _TEXT("RemoteIP"), (LPBYTE)&dwIP);
+			//初始化等待ip
+			ENGINE_COMPONENT_INFO loginsrvinfo = g_SeverConfig.getLoginSrvInfo();
 
-			if (!jRegGetKey(_LOGINGATE_SERVER_REGISTRY, _TEXT("RemotePort"), (LPBYTE)&nPort))
-				nPort = 5500;
+			nPort = loginsrvinfo.intport?loginsrvinfo.intport:5500;
 
-			ConnectToServer(g_csock, &g_caddr, _IDM_CLIENTSOCK_MSG, NULL, dwIP, nPort, FD_CONNECT|FD_READ|FD_CLOSE);
+			//连接loginsrv
+			ConnectToServer(g_csock, &g_caddr, _IDM_CLIENTSOCK_MSG, loginsrvinfo.intip.c_str(), dwIP, nPort, FD_CONNECT|FD_READ|FD_CLOSE);
 
 			HMENU hMainMenu = GetMenu(g_hMainWnd);
 			HMENU hMenu = GetSubMenu(hMainMenu, 0);
@@ -176,7 +183,7 @@ void OnCommand(WPARAM wParam, LPARAM lParam)
 //			
 //
 // **************************************************************************************
-
+//回掉
 LPARAM APIENTRY MainWndProc(HWND hWnd, UINT nMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (nMsg)

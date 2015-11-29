@@ -54,6 +54,12 @@ DBServer::DBServer(const char * szName)
 	if(m_pDB != NULL) m_pDB->SetCallBackFunc(DumpErrorFunc, this);
 	m_nLastTag	= -1;
 	strncpy(m_szName, szName, MAX_PATH);
+
+	char szFileName[MAX_PATH] = {0};
+	sprintf(szFileName, "%s.dbp", m_szName);
+
+	m_pDBProtect = new CDBProtectPlus(szFileName, this);
+	m_bDBProtect = false;
 }
 
 DBServer::~DBServer()
@@ -92,7 +98,7 @@ bool DBServer::ConnectDB(const char * ip, const char * userName, const char * pa
 	if(bRlt = _ConnectDB(ip, userName, password, dBaseName, create))
 	{
 		//	成功连接后,自动进行数据恢复功能
-		return true;
+		return _StartProtect();
 	}
 	return bRlt;
 }
@@ -158,7 +164,8 @@ bool DBServer::Query(QueryRlt* pRlt,const char* szFormat,...)
 	if(!pQuery->ExecuteSQL(szSQL))
 	{
 		delete pQuery;
-		//LeaveCriticalSection(&m_xLock);
+		//执行失败
+		Proctect(szSQL,NULL,0);
 		return false;
 	}
 	if(!pQuery->FetchRecords(true))
@@ -213,7 +220,7 @@ bool DBServer::GetBLOB(BYTE* pRltData, int nBufferSize,const char* szCmd)
 					{
 						char* szName = query.GetFieldName(j);
 						int fieldNamelen = strlen(szName)+1;
-						DWORD	datasize = 0;
+						int	datasize = 0;
 						BYTE*	pData = (BYTE*)query.GetFieldValue(j,(int*)&datasize);
 						DWORD dwSize = min(datasize, nBufferSize);
 						memcpy(pRltData,pData, dwSize);
@@ -264,7 +271,7 @@ bool DBServer::GetBLOB(BYTE* pRltData, int nBufferSize, int& nDataSize, const ch
 				{
 					char* szName = query.GetFieldName(j);
 					int fieldNamelen = strlen(szName)+1;
-					DWORD	datasize = 0;
+					int	datasize = 0;
 					BYTE*	pData = (BYTE*)query.GetFieldValue(j,(int*)&datasize);
 					nDataSize = min(datasize, nBufferSize);
 					memcpy(pRltData,pData, nDataSize);
@@ -330,6 +337,80 @@ bool DBServer::_CreateLogFile( void )
 
 void DBServer::_OutputLog( const char * szSQL )
 {
+}
+
+bool DBServer::_StartProtect( void )
+{
+	//执行上一次的错误遗留的数据库记录
+	if(m_bDBProtect) return false;
+
+	if(m_pDBProtect->LoadOperation())
+	{
+		printf("%s will start db protect!\n", m_szName);
+
+		if(!m_pDBProtect->Excute())
+		{
+			printf("%s start db protect failed!\n", m_szName);
+			return false;
+		}
+	}
+	m_bDBProtect = true;
+	return true;
+}
+
+bool DBServer::Proctect( char * szSQL,char *pData,int nLen )
+{
+	if(m_bDBProtect)
+	{
+		//	db protect
+		CDBOperation * pOperation = new CDBOperationPlus();
+		pOperation->SetSQL(szSQL);
+		pOperation->AddBlob(pData,nLen);
+		m_pDBProtect->AddOperation(pOperation);
+
+		return true;
+	}
+
+	return false;
+}
+
+
+bool CDBOperationPlus::Excute( CDBProtect * pProtect )
+{
+	bool bRlt = false;
+
+	CDBProtectPlus *plus = dynamic_cast<CDBProtectPlus*>(pProtect);
+	if (plus == NULL)
+		return false;
+
+	DBServer * pServer = plus->m_pParent;
+
+	int nBLOBSize = m_listBLOB.size();
+	if(nBLOBSize == 0)
+	{
+		bRlt = pServer->ExecuteSQL(m_szSQL);
+	}
+	else if(nBLOBSize == 1)
+	{
+		CDBBLOB * pBLOB = *m_listBLOB.begin();
+		bRlt = pServer->SetBLOB((BYTE*)pBLOB->m_pData, pBLOB->m_nLen, m_szSQL);
+	}
+
+	if(!bRlt && !pServer->IsConnected()) return false;
+	return true;
+}
+
+
+CDBProtectPlus::CDBProtectPlus( char * szFileName,DBServer *pServer )
+	:CDBProtect(szFileName)
+{
+	m_pParent = pServer;
+}
+
+CDBOperation * CDBProtectPlus::CreateOperation()
+{
+	CDBOperationPlus *plus = new CDBOperationPlus();
+	return plus;
 }
 
 } // --db--

@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="ConfigDlgFunc.cpp" />
+    <ClCompile Include="..\Def\dbmgr.cpp" />
+    <ClCompile Include="DBSvr.cpp" />
+    <ClCompile Include="GameGateSockMsg.cpp" />
+    <ClCompile Include="GateCommSockMsg.cpp" />
+    <ClCompile Include="GateInfo.cpp" />
+    <ClCompile Include="GlobalUserList.cpp" />
+    <ClCompile Include="MainWndProc.cpp" />
+    <ClCompile Include="..\Def\Misc.cpp" />
+    <ClCompile Include="ProcessDBMsg.cpp" />
+    <ClCompile Include="ProcessGateMsg.cpp" />
+    <ClCompile Include="ProcessServerMsg.cpp" />
+    <ClCompile Include="ServerCommSockMsg.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="TableList.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\util.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\database.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\error.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\prime.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\syncobj.cpp" />
+    <ClCompile Include="..\Def\EnDecode.cpp" />
+    <ClCompile Include="..\Def\RegstryHandler.cpp" />
+    <ClCompile Include="..\Def\ServerSockHandler.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\stringex.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Def\dbmgr.h" />
+    <ClInclude Include="DBSvr.h" />
+    <ClInclude Include="..\Def\EnDecode.h" />
+    <ClInclude Include="GlobalUserList.h" />
+    <ClInclude Include="..\Def\List.h" />
+    <ClInclude Include="..\Def\Misc.h" />
+    <ClInclude Include="ProcessDBMsg.h" />
+    <ClInclude Include="..\Def\Protocol.h" />
+    <ClInclude Include="..\Def\Queue.h" />
+    <ClInclude Include="..\Def\ServerSockHandler.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="..\Def\_OrzEx\stringex.h" />
+    <ClInclude Include="TableList.h" />
+    <ClInclude Include="..\Def\_OrzEx\util.h" />
+    <ClInclude Include="..\Def\_OrzEx\database.h" />
+    <ClInclude Include="..\Def\_OrzEx\error.h" />
+    <ClInclude Include="..\Def\_OrzEx\prime.h" />
+    <ClInclude Include="..\Def\_OrzEx\syncobj.h" />
+    <ClInclude Include="..\Def\_OrzEx\bstree.h">
+      <Filter>Def</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Def\_OrzEx\fsa.h">
+      <Filter>Def</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Def\_OrzEx\list.h">
+      <Filter>Def</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Def\_OrzEx\indexmap.h">
+      <Filter>Def</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Def\_OrzEx\map.h">
+      <Filter>Def</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DBSvr.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\MIR2.ICO" />
+    <None Include="Res\toolbar.bmp" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Def">
+      <UniqueIdentifier>{47d1bf6a-2ce1-4d2c-85f6-841506cd6ecd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

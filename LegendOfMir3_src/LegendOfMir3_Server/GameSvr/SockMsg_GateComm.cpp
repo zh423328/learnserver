@@ -53,8 +53,12 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 			if (g_xGateList.AddNewNode(pGateInfo))
 			{
 				int zero = 0;
-				
 				setsockopt(pGateInfo->m_sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero) );
+				zero = 0;
+				setsockopt( pGateInfo->m_sock, SOL_SOCKET, SO_RCVBUF, (char*)&zero, sizeof(zero));
+
+				int nodelay = 1;
+				setsockopt( pGateInfo->m_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
 
 				ZeroMemory(&(pGateInfo->OverlappedEx), sizeof(OVERLAPPED) * 2);
 
@@ -105,7 +109,7 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 						pUserInfo->m_bEmpty = true;
 						pUserInfo->Unlock();
 						
-						// °íÃÄ¾ß µÊ
+						//
 						if (pUserInfo->m_pxPlayerObject)
 							pUserInfo->m_pxPlayerObject->m_pMap->RemoveObject(pUserInfo->m_pxPlayerObject->m_nCurrX,
 																				pUserInfo->m_pxPlayerObject->m_nCurrY,

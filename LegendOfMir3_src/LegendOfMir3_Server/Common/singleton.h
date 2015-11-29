@@ -16,7 +16,7 @@
 
 // 急型宏后不用管该对象的初始化和释放
 #define CreateSingleton( type ) \
-	InitialiseSingleton( type ); \
+	InitialiseSingleton(type);\
 	type the##type
 
 

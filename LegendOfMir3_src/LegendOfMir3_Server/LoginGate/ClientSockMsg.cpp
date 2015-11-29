@@ -93,14 +93,31 @@ LPARAM OnClientSockMsg(WPARAM wParam, LPARAM lParam)
 
 void SendExToServer(char *pszPacket)
 {
+	//发送给loginSrv更新
+	Packet *pPacket = new Packet();
+	pPacket->ver  = PHVer;
+	pPacket->hlen = PHLen;
+	
+	pPacket->tos = TOS_LOGINGATE_2_LOGINSRV;
+
+	char szMsg[DATA_BUFSIZE] = {0};
+
 	DWORD	dwSendBytes;
 	WSABUF	buf;
 
-	buf.len = memlen(pszPacket) - 1;
-	buf.buf = pszPacket;
+	int datalen = memlen(pszPacket) - 1;
+	pPacket->tlen = pPacket->hlen + datalen;
+
+	memcpy(szMsg,pPacket,pPacket->hlen);
+	memcpy(szMsg + pPacket->hlen,pszPacket,datalen);
+
+	buf.len = pPacket->tlen;
+	buf.buf = szMsg;
 
 	if ( WSASend(g_csock, &buf, 1, &dwSendBytes, 0, NULL, NULL) == SOCKET_ERROR )
 	{
 		int nErr = WSAGetLastError();
 	}
+
+	SAFE_DELETE(pPacket);
 }

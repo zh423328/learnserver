@@ -5,6 +5,7 @@
 #include "../def/dbmgr.h"
 #include "TableList.h"
 #include "../Common/DBManager.h"
+#include "../Common/ServerConfig.h"
 
 #ifdef _DEBUG 
 #pragma comment(lib,"Common_d.lib")
@@ -28,6 +29,8 @@ BOOL	CALLBACK ConfigDlgFunc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 void	CreateConfigProperties();
 
+//读取配置
+BOOL	LoadConfig();
 // **************************************************************************************
 //
 //			Global Variables Definition
@@ -39,6 +42,9 @@ HWND			g_hMainWnd = NULL;			// Main window handle
 HWND			g_hLogMsgWnd = NULL;
 HWND			g_hToolBar = NULL;
 HWND			g_hStatusBar = NULL;
+
+/** 当前服务器组件类别和ID */
+COMPONENT_TYPE g_componentType = DBSRV_TYPE;
 
 static WSADATA	g_wsd;
 
@@ -54,30 +60,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 {
     MSG msg;
 
-//	if (CheckAvailableIOCP())
-//	{
-		if (!InitApplication(hInstance))
-			return (FALSE);
+	if (!LoadConfig())
+		return FALSE;
 
-		if (!InitInstance(hInstance, nCmdShow))
-			return (FALSE);
+	if (!InitApplication(hInstance))
+		return (FALSE);
 
-		while (GetMessage(&msg, NULL, 0, 0))
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-/*	}
-	else
+	if (!InitInstance(hInstance, nCmdShow))
+		return (FALSE);
+
+	while (GetMessage(&msg, NULL, 0, 0))
 	{
-		TCHAR szMsg[1024];
-
-		LoadString(hInstance, IDS_NOTWINNT, szMsg, sizeof(szMsg));
-		MessageBox(NULL, szMsg, _LOGINGATE_SERVER_TITLE, MB_OK|MB_ICONINFORMATION);
-		
-		return -1;
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
 	}
-*/
     return (msg.wParam);
 }
 
@@ -185,32 +181,14 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 
 	if (WSAStartup(MAKEWORD(2, 2), &g_wsd) != 0)
 		return (FALSE);
-
-	BYTE	btInstalled;
-
-	//注册表
-	//if (!jRegGetKey(_DB_SERVER_REGISTRY, _TEXT("Installed"), (LPBYTE)&btInstalled))
-	//	DialogBox(g_hInst, MAKEINTRESOURCE(IDD_CONFIGDLG), NULL, (DLGPROC)ConfigDlgFunc);
-
-	//TCHAR	wszDatabase[256];
-	//char	szDatabase[256];
-
-	//jRegGetKey(_DB_SERVER_REGISTRY, _TEXT("Device"), (LPBYTE)wszDatabase);
-	//WideCharToMultiByte(CP_ACP, 0, wszDatabase, -1, szDatabase, sizeof(szDatabase), NULL, NULL);
-
-	DBManager::GetInstance().Initialize("127.0.0.1",3306,"kbe","kbe","LegendofMir",4);
-	//GetDBManager()->Init( InsertLogMsg, szDatabase, "sa", "prg" );
-	//
-	//
-	////数据库连接
-	//CConnection *pConn = GetDBManager()->m_dbMain.CreateConnection( "Mir2_Common", "sa", "prg" );
-	//if ( pConn )
-	//{
-	//	if ( !GetTblStartPoint()->Init( pConn ) )
-	//		InsertLogMsg( _T("failed to read TBL_STARTPOINT table\n") );
-	//}
-	//GetDBManager()->m_dbMain.DestroyConnection( pConn );
-
+	
+	//读取数据
+	ENGINE_COMPONENT_INFO info = g_SeverConfig.getDBSrvInfo();
+	if (info.dbip.length()&&info.dbport&&info.dbuser.length() &&info.dbpwd.length())
+	{
+		return DBManager::GetInstance().Initialize(info.dbip.c_str(),info.dbport,info.dbuser.c_str(),
+			info.dbpwd.c_str(),info.dbname.c_str(),info.dbconnectcnt);
+	}
 	return TRUE;
 }
 
@@ -300,4 +278,10 @@ void InsertLogMsgParam(UINT nID, void *pParam, BYTE btFlags)
 		ListView_SetItemText(g_hLogMsgWnd, nCount, 2, szMsg);
 		ListView_Scroll(g_hLogMsgWnd, 0, 8);
 	}
+}
+
+
+BOOL LoadConfig()
+{
+	return g_SeverConfig.LoadServerConfig("ServersConfig.xml");
 }

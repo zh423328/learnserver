@@ -53,8 +53,12 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 			if (g_xServerList.AddNewNode(pServerInfo))
 			{
 				int zero = 0;
-				
-				setsockopt(pServerInfo->m_sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero));
+				setsockopt(pServerInfo->m_sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero) );
+				zero = 0;
+				setsockopt( pServerInfo->m_sock, SOL_SOCKET, SO_RCVBUF, (char*)&zero, sizeof(zero));
+
+				int nodelay = 1;
+				setsockopt( pServerInfo->m_sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
 
 				ZeroMemory(&(pServerInfo->Overlapped), sizeof(OVERLAPPED));
 

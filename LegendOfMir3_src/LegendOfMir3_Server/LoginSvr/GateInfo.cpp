@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "../def/dbmgr.h"
 #include <stdio.h>
+#include "../Common/Packet.h"
 
 extern CWHList< GAMESERVERINFO* >	g_xGameServerList;
 extern char							g_szServerList[1024];
@@ -83,10 +84,8 @@ void CGateInfo::Close()
 void CGateInfo::SendToGate(SOCKET cSock, char *pszPacket)
 {
 	char	szData[256];
-	WSABUF	buf;
-	DWORD	dwSendBytes;
-	
-//	wsprintf(szData, _TEXT("%%%d/#%s!$"), (int)cSock, pszPacket);
+
+	wsprintf(szData, _TEXT("%%%d/#%s!$"), (int)cSock, pszPacket);
 	
 	int nLen = memlen(pszPacket) - 1;
 
@@ -105,10 +104,10 @@ void CGateInfo::SendToGate(SOCKET cSock, char *pszPacket)
 	*pszNext++ = '$';
 	*pszNext++ = '\0';
 
-	buf.len = pszNext - szData;
-	buf.buf = szData;
-
-	WSASend(sock, &buf, 1, &dwSendBytes, 0, NULL, NULL);
+	//buf.len = pszNext - szData;
+	//buf.buf = szData;
+	SendToGate(szData,pszNext-szData);
+//	WSASend(sock, &buf, 1, &dwSendBytes, 0, NULL, NULL);
 }
 
 /* **************************************************************************************
@@ -590,3 +589,35 @@ void CGateInfo::ProcLogin(SOCKET s, char *pszData)
 		pListNode = xUserInfoList.GetNext(pListNode);
 	}
 }
+
+void CGateInfo::SendToGate( char * szData,int nLen )
+{
+	//发送给loginSrv更新
+	Packet *pPacket = new Packet();
+	pPacket->ver  = PHVer;
+	pPacket->hlen = PHLen;
+
+	pPacket->tos = TOS_LOGINSRV_2_LOGINGATE;
+
+	char szMsg[DATA_BUFSIZE] = {0};
+
+	DWORD	dwSendBytes;
+	WSABUF	buf;
+
+	int datalen = nLen;
+	pPacket->tlen = pPacket->hlen + datalen;
+
+	memcpy(szMsg,pPacket,pPacket->hlen);
+	memcpy(szMsg + pPacket->hlen,szData,datalen);
+
+	buf.len = pPacket->tlen;
+	buf.buf = szMsg;
+
+	if ( WSASend(sock, &buf, 1, &dwSendBytes, 0, NULL, NULL) == SOCKET_ERROR )
+	{
+		int nErr = WSAGetLastError();
+	}
+
+	SAFE_DELETE(pPacket);
+}
+

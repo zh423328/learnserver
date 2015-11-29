@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "../Common/ServerConfig.h"
 
 #define PACKET_KEEPALIVE		"%--$"
 
@@ -35,12 +36,10 @@ VOID WINAPI OnTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 
 				InsertLogMsg(IDS_APPLY_RECONNECT);
 
-				jRegGetKey(_LOGINGATE_SERVER_REGISTRY, _TEXT("RemoteIP"), (LPBYTE)&dwIP);
+				ENGINE_COMPONENT_INFO info = g_SeverConfig.getLoginSrvInfo();
 
-				if (!jRegGetKey(_LOGINGATE_SERVER_REGISTRY, _TEXT("RemotePort"), (LPBYTE)&nPort))
-					nPort = 5000;
-
-				ConnectToServer(g_csock, &g_caddr, _IDM_CLIENTSOCK_MSG, NULL, dwIP, nPort, FD_CONNECT|FD_READ|FD_CLOSE);
+				nPort = info.intport?info.intport:5500;
+				ConnectToServer(g_csock, &g_caddr, _IDM_CLIENTSOCK_MSG, info.intip.c_str(),dwIP, nPort, FD_CONNECT|FD_READ|FD_CLOSE);
 			}
 
 			break;

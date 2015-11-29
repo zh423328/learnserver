@@ -69,10 +69,21 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 			if (g_xGateList.AddNewNode(pGateInfo))
 			{
 				int zero = 0;
-				
 				setsockopt(pGateInfo->sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero) );
+				zero = 0;
+				setsockopt( pGateInfo->sock, SOL_SOCKET, SO_RCVBUF, (char*)&zero, sizeof(zero));
 
-				pGateInfo->Recv();
+				int nodelay = 1;
+				setsockopt( pGateInfo->sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
+
+				int retcode = pGateInfo->Recv();
+
+				if ( (retcode == SOCKET_ERROR) && (WSAGetLastError() != WSA_IO_PENDING) )
+				{
+					//会接受到异常的信息
+					//closesocket(Accept);
+					continue;
+				}
 
 				UpdateStatusBar(TRUE);
 

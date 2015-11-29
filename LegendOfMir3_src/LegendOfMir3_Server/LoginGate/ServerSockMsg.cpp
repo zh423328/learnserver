@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "../Common/Packet.h"
 
 void SendExToServer(char *pszPacket);
 
@@ -25,10 +26,11 @@ void UpdateStatusBar(BOOL fGrow)
 }
 
 //UINT WINAPI AcceptThread(LPVOID lpParameter)
+//logingate接受线程
 DWORD WINAPI AcceptThread(LPVOID lpParameter)
 {
 	int							nLen = sizeof(SOCKADDR_IN);
-	char						szMsg[64];
+	char						szMsg[128] = {0};
 
 	SOCKET						Accept;
 	SOCKADDR_IN					Address;
@@ -40,7 +42,7 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 		if (g_fTerminated)
 			return 0;
 
-		CSessionInfo* pNewUserInfo = (CSessionInfo*)GlobalAlloc(GPTR, sizeof(CSessionInfo));
+		CSessionInfo* pNewUserInfo = CSessionInfo::ObjPool().createObject();//(CSessionInfo*)GlobalAlloc(GPTR, sizeof(CSessionInfo));
 
 		if (pNewUserInfo)
 		{
@@ -51,11 +53,19 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 			if (g_xSessionList.AddNewNode(pNewUserInfo))
 			{
 				int zero = 0;
-				
 				setsockopt(pNewUserInfo->sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero) );
+				zero = 0;
+				setsockopt( pNewUserInfo->sock, SOL_SOCKET, SO_RCVBUF, (char*)&zero, sizeof(zero));
 
-				// ORZ:
-				pNewUserInfo->Recv();
+				int nodelay = 1;
+				setsockopt( pNewUserInfo->sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
+
+				// ORZ:接受数据
+				int retcode = pNewUserInfo->Recv();
+				if ( (retcode == SOCKET_ERROR) && (WSAGetLastError() != WSA_IO_PENDING) )
+				{
+					continue;
+				}
 
 				UpdateStatusBar(TRUE);
 
@@ -77,6 +87,7 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 				*pszPos++	= '$';
 				*pszPos		= '\0';
 
+				//发送给loginsrv更新
 				SendExToServer(szMsg);
 			}
 		}
@@ -85,7 +96,7 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 	return 0;
 }
 
-//void CloseSession(CSessionInfo* pSessionInfo)
+//发送给loginsrv关闭
 void CloseSession(int s)
 {
 	char szMsg[32];
@@ -130,6 +141,7 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 			if (g_fTerminated)
 				return 0;
 
+			//失败关闭
 			if (pSessionInfo)
 			{
 				szMsg[0] = '%';
@@ -149,7 +161,8 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 
 				UpdateStatusBar(FALSE);
 
-				GlobalFree(pSessionInfo);
+				//GlobalFree(pSessionInfo);
+				CSessionInfo::ObjPool().reclaimObject(pSessionInfo);
 			}
 
 			continue;
@@ -177,8 +190,8 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 
 			UpdateStatusBar(FALSE);
 
-			GlobalFree(pSessionInfo);
-
+			//GlobalFree(pSessionInfo);
+			CSessionInfo::ObjPool().reclaimObject(pSessionInfo);
 			continue;
 		}
 
@@ -202,10 +215,10 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 		// ORZ:
 		if ( pSessionInfo->Recv() == SOCKET_ERROR && WSAGetLastError() != ERROR_IO_PENDING )
 		{
-				InsertLogMsg(_TEXT("WSARecv() failed"));
+			InsertLogMsg(_TEXT("WSARecv() failed"));
 			
-				CloseSession(pSessionInfo->sock);
-				continue;
+			CloseSession(pSessionInfo->sock);
+			continue;
 		}
 	}
 

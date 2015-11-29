@@ -67,8 +67,12 @@ LPARAM OnGateCommSockMsg(WPARAM wParam, LPARAM lParam)
 				if (g_xGateInfoList.AddNewNode(pGateInfo))
 				{
 					int zero = 0;
-					
 					setsockopt(pGateInfo->sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero) );
+					zero = 0;
+					setsockopt( pGateInfo->sock, SOL_SOCKET, SO_RCVBUF, (char*)&zero, sizeof(zero));
+
+					int nodelay = 1;
+					setsockopt( pGateInfo->sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
 
 					UpdateStatusBarGateSession(TRUE);
 				}

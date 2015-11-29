@@ -2,7 +2,11 @@
 #ifndef _LOGINGATE_DEFINE
 #define _LOGINGATE_DEFINE
 
-class CSessionInfo
+#include "../Common/pool.h"
+#include "../Common/Packet.h"
+
+//玩家连入信息
+class CSessionInfo : public PoolObject
 {
 public:
 	SOCKET						sock;
@@ -19,6 +23,26 @@ public:
 		bufLen	= 0;
 	}
 
+	//创建一个
+	static ObjectPool<CSessionInfo>& ObjPool();
+
+	static void destroyObjPool();
+
+	virtual void onReclaimObject()
+	{
+		//重置
+		sock = INVALID_SOCKET;
+		bufLen = 0;
+		memset(Buffer,0,DATA_BUFSIZE);
+		memset(&Overlapped,0,sizeof(OVERLAPPED));
+	}
+
+	virtual size_t getPoolObjectBytes()
+	{
+		size_t bytes = DATA_BUFSIZE + sizeof(bufLen) + sizeof(SOCKET) + sizeof(OVERLAPPED);
+
+		return bytes;
+	}
 	int  Recv()
 	{
 		DWORD nRecvBytes = 0, nFlags = 0;
@@ -31,15 +55,26 @@ public:
 		return WSARecv( sock, &DataBuf, 1, &nRecvBytes, &nFlags, &Overlapped, 0 );
 	}
 
+	//是否有个完整的包
 	bool HasCompletionPacket()
 	{
-		return memchr( Buffer, '!', bufLen ) ? true : false;
+		//return memchr( Buffer, '!', bufLen ) ? true : false;
+		if (bufLen >= PHLen)	//包头长度
+		{
+			return true;
+		}
+		else
+			return false;
 	}
 
-	// recv 滚欺俊辑 肯己等 窍唱狼 菩哦阑 惶酒辰促.
+	// recv 展开包
 	char * ExtractPacket( char *pPacket )
 	{
-		int packetLen = (char *) memchr( Buffer, '!', bufLen ) - Buffer + 1;
+		Packet *pHavePacket = (Packet*)Buffer;
+		if (pPacket== NULL)
+			return NULL;
+
+		int packetLen = pHavePacket->tlen;	//包长度
 
 		memcpy( pPacket, Buffer, packetLen );
 

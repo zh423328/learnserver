@@ -37,7 +37,7 @@ typedef struct tag_TOVERLAPPEDEX
 
 
 BOOL InitServerSocket(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, int nPort, long lEvent = 2);
-BOOL ConnectToServer(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, LPCTSTR lpServerIP, DWORD dwIP, int nPort, long lEvent);
+BOOL ConnectToServer(SOCKET &s, SOCKADDR_IN* addr, UINT nMsgID, const char* lpServerIP, DWORD dwIP, int nPort, long lEvent);
 BOOL ClearSocket(SOCKET &s);
 
 BOOL CheckAvailableIOCP();

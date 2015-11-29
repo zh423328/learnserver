@@ -2,6 +2,13 @@
 //
 
 #include "stdafx.h"
+#include "../Common/ServerConfig.h"
+
+#ifdef _DEBUG
+#pragma comment(lib,"Common_d.lib")
+#else
+#pragma comment(lib,"Common.lib")
+#endif
 
 // **************************************************************************************
 
@@ -14,17 +21,19 @@ BOOL	jRegGetKey(LPCTSTR pSubKeyName, LPCTSTR pValueName, LPBYTE pValue);
 
 BOOL	CALLBACK ConfigDlgFunc(HWND hWndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
+bool	LoadConfig();
 // **************************************************************************************
 //
 //			Global Variables Definition
 //
 // **************************************************************************************
-
 HINSTANCE		g_hInst = NULL;				// Application instance
 HWND			g_hMainWnd = NULL;			// Main window handle
 HWND			g_hLogMsgWnd = NULL;
 HWND			g_hToolBar = NULL;
 HWND			g_hStatusBar = NULL;
+COMPONENT_TYPE	g_componentType = LOGINGATE_TYPE;
+static	ObjectPool<CSessionInfo> g_objPool("CSessionInfo");
 
 static WSADATA	g_wsd;
 
@@ -48,6 +57,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	if (CheckAvailableIOCP())								//检测
 	{
+		if (!LoadConfig())
+			return FALSE;
+
 		if (!InitApplication(hInstance))
 			return (FALSE);
 
@@ -178,12 +190,6 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 	if (WSAStartup(MAKEWORD(2, 2), &g_wsd) != 0)
 		return (FALSE);
 
-	//
-	BYTE	btInstalled;
-
-	if (!jRegGetKey(_LOGINGATE_SERVER_REGISTRY, _TEXT("Installed"), (LPBYTE)&btInstalled))
-		DialogBox(g_hInst, MAKEINTRESOURCE(IDD_CONFIGDLG), NULL, (DLGPROC)ConfigDlgFunc);
-
 	InvalidateRect( g_hMainWnd, NULL, TRUE );
 
 	return TRUE;
@@ -195,6 +201,7 @@ BOOL InitInstance(HANDLE hInstance, int nCmdShow)
 //
 // **************************************************************************************
 
+//添加一个新纪录 
 int AddNewLogMsg()
 {
 	LV_ITEM		lvi;
@@ -244,15 +251,20 @@ void InsertLogMsg(LPTSTR lpszMsg)
 	ListView_SetItemText(g_hLogMsgWnd, nCount, 2, lpszMsg);
 	ListView_Scroll(g_hLogMsgWnd, 0, 8);
 }
-/*
-void InsertLogPacket(char *pszPacket)
+
+bool LoadConfig()
 {
-	LPTGateToSvrHeader lpHdr = (LPTGateToSvrHeader)pszPacket;
-	TCHAR szMsg[256];
-
-	_stprintf(szMsg, "%c%c%d%d%d%s", lpHdr->szPrefix, lpHdr->szID, lpHdr->btGateIndex, lpHdr->nSocket, lpHdr->wDataLength,
-										(char *)lpHdr + GTS_HEADER_SIZE);
-
-	InsertLogMsg(szMsg);
+	return g_SeverConfig.LoadServerConfig("ServersConfig.xml");
 }
-*/
+
+ObjectPool<CSessionInfo>& CSessionInfo::ObjPool()
+{
+	return g_objPool;
+}
+
+void CSessionInfo::destroyObjPool()
+{
+	g_objPool.destroy();
+}
+
+

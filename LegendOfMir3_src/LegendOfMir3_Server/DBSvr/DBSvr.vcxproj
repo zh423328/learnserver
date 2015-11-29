@@ -330,6 +330,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Def\dbmgr.h" />
+    <ClInclude Include="..\Def\_OrzEx\bstree.h" />
+    <ClInclude Include="..\Def\_OrzEx\fsa.h" />
+    <ClInclude Include="..\Def\_OrzEx\indexmap.h" />
+    <ClInclude Include="..\Def\_OrzEx\list.h" />
+    <ClInclude Include="..\Def\_OrzEx\map.h" />
     <ClInclude Include="DBSvr.h" />
     <ClInclude Include="..\Def\EnDecode.h" />
     <ClInclude Include="GlobalUserList.h" />
@@ -343,11 +348,6 @@
     <ClInclude Include="..\Def\_OrzEx\stringex.h" />
     <ClInclude Include="TableList.h" />
     <ClInclude Include="..\Def\_OrzEx\util.h" />
-    <ClInclude Include="..\..\_Oranze Library\bstree.h" />
-    <ClInclude Include="..\..\_Oranze Library\fsa.h" />
-    <ClInclude Include="..\..\_Oranze Library\indexmap.h" />
-    <ClInclude Include="..\..\_Oranze Library\list.h" />
-    <ClInclude Include="..\..\_Oranze Library\map.h" />
     <ClInclude Include="..\Def\_OrzEx\database.h" />
     <ClInclude Include="..\Def\_OrzEx\error.h" />
     <ClInclude Include="..\Def\_OrzEx\prime.h" />

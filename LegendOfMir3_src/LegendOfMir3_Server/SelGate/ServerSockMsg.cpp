@@ -55,8 +55,12 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 			if (g_xSessionList.AddNewNode(pNewUserInfo))
 			{
 				int zero = 0;
-				
 				setsockopt(pNewUserInfo->sock, SOL_SOCKET, SO_SNDBUF, (char *)&zero, sizeof(zero) );
+				zero = 0;
+				setsockopt( pNewUserInfo->sock, SOL_SOCKET, SO_RCVBUF, (char*)&zero, sizeof(zero));
+
+				int nodelay = 1;
+				setsockopt( pNewUserInfo->sock, IPPROTO_TCP, TCP_NODELAY, (char*)&nodelay, sizeof(nodelay) );
 
 				// ORZ:
 				pNewUserInfo->Recv();

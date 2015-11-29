@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="AddSvrListFunc.cpp" />
+    <ClCompile Include="ConfigDlgFunc.cpp" />
+    <ClCompile Include="..\Def\dbmgr.cpp" />
+    <ClCompile Include="GateCommSockMsg.cpp" />
+    <ClCompile Include="GateInfo.cpp" />
+    <ClCompile Include="LoginSvr.cpp" />
+    <ClCompile Include="MainWndProc.cpp" />
+    <ClCompile Include="..\Def\Misc.cpp" />
+    <ClCompile Include="ServerListProc.cpp" />
+    <ClCompile Include="StdAfx.cpp" />
+    <ClCompile Include="ThreadFuncForMsg.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\database.cpp" />
+    <ClCompile Include="..\Def\_OrzEx\syncobj.cpp" />
+    <ClCompile Include="..\Def\EnDecode.cpp" />
+    <ClCompile Include="..\Def\RegstryHandler.cpp" />
+    <ClCompile Include="..\Def\ServerSockHandler.cpp" />
+    <ClCompile Include="AccountManager.cpp">
+      <Filter>Account</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Def\dbmgr.h" />
+    <ClInclude Include="..\Def\DynamicArray.h" />
+    <ClInclude Include="..\Def\EnDecode.h" />
+    <ClInclude Include="..\Def\List.h" />
+    <ClInclude Include="LoginSvr.h" />
+    <ClInclude Include="..\Def\Misc.h" />
+    <ClInclude Include="..\Def\Protocol.h" />
+    <ClInclude Include="..\Def\Queue.h" />
+    <ClInclude Include="..\Def\ServerSockHandler.h" />
+    <ClInclude Include="StdAfx.h" />
+    <ClInclude Include="..\Def\_OrzEx\database.h" />
+    <ClInclude Include="..\Def\_OrzEx\syncobj.h" />
+    <ClInclude Include="AccountManager.h">
+      <Filter>Account</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="LoginSvr.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Res\MIR2.ICO" />
+    <None Include="Res\toolbar.bmp" />
+    <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Account">
+      <UniqueIdentifier>{c536935b-5121-4473-b95c-94d9f980c0ea}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include <stdio.h>
 #include "../def/dbmgr.h"
-
+#include "../Common/ServerConfig.h"
 
 BOOL			jRegSetKey(LPCSTR pSubKeyName, LPCSTR pValueName, DWORD dwFlags, LPBYTE pValue, DWORD nValueSize);
 BOOL			jRegGetKey(LPCSTR pSubKeyName, LPCSTR pValueName, LPBYTE pValue);
@@ -91,36 +91,7 @@ void CreateConfigProperties()
 
 UINT WINAPI LoadAccountRecords(LPVOID lpParameter)
 {
-	//InsertLogMsg(IDS_LOADACCOUNTRECORDS);
-
-
-	//下面这一段是获取服务器相关消息的，暂时屏蔽掉
-	//CRecordset *pRec = GetDBManager()->CreateRecordset();
-	//pRec->Execute( "UPDATE TBL_ACCOUNT SET FLD_CERTIFICATION=0 WHERE FLD_CERTIFICATION >= 30" );
-	//GetDBManager()->DestroyRecordset( pRec );
-	//// ----------------------------------------------------------------------------------------
-
-	//GAMESERVERINFO *pServerInfo;
-
-	//pRec = GetDBManager()->CreateRecordset();
-	//if ( pRec->Execute( "SELECT * FROM TBL_SERVERINFO" ) )
-	//{
-	//	while ( pRec->Fetch() )
-	//	{			
-	//		pServerInfo = new GAMESERVERINFO;
-	//		if ( !pServerInfo )
-	//			break;
-
-	//		pServerInfo->index = atoi( pRec->Get( "FLD_SERVERIDX" ) );
-	//		strcpy( pServerInfo->name, pRec->Get( "FLD_SERVERNAME" ) );
-	//		strcpy( pServerInfo->ip,   pRec->Get( "FLD_SERVERIP" ) );
-	//		pServerInfo->connCnt = 0;
-
-	//		g_xGameServerList.AddNewNode( pServerInfo );
-	//	}
-	//}
-	//GetDBManager()->DestroyRecordset( pRec );
-
+	//获取服务器列表的
 	GAMESERVERINFO *pServerInfo;
 	char szTmp[64];
 	for ( PLISTNODE pNode = g_xGameServerList.GetHead(); pNode; pNode = g_xGameServerList.GetNext( pNode ) )
@@ -132,9 +103,12 @@ UINT WINAPI LoadAccountRecords(LPVOID lpParameter)
 	}
 	// ----------------------------------------------------------------------------------------
 
+	//服务器线程
 	InitServerThreadForMsg();
 
-	if (InitServerSocket(g_gcSock, &g_gcAddr, _IDM_GATECOMMSOCK_MSG, 5500, 1))
+	ENGINE_COMPONENT_INFO info = g_SeverConfig.getLoginSrvInfo();
+
+	if (InitServerSocket(g_gcSock, &g_gcAddr, _IDM_GATECOMMSOCK_MSG, info.intport?info.intport:5500, 1))
 		SwitchMenuItem(TRUE);
 
 	return 0L;
