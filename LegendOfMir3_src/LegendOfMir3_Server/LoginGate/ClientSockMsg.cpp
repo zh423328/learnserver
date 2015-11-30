@@ -59,7 +59,9 @@ LPARAM OnClientSockMsg(WPARAM wParam, LPARAM lParam)
 			closesocket(g_csock);
 			g_csock = INVALID_SOCKET;
 
-			OnCommand(IDM_STOPSERVICE, 0);
+			//OnCommand(IDM_STOPSERVICE, 0);
+			//µÈ´ýÁ¬½Ó
+			SetTimer(g_hMainWnd, _ID_TIMER_CONNECTSERVER, 10000, (TIMERPROC)OnTimerProc);
 
 			break;
 		}

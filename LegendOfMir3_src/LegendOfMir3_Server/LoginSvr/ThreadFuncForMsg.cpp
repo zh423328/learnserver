@@ -3,6 +3,7 @@
 extern HWND						g_hStatusBar;
 extern CWHList<CGateInfo*>		g_xGateList;
 
+//´¦Àí²Ù×÷
 UINT WINAPI ThreadFuncForMsg(LPVOID lpParameter)
 {
 	_TDEFAULTMESSAGE	DefaultMsg;
@@ -35,7 +36,9 @@ UINT WINAPI ThreadFuncForMsg(LPVOID lpParameter)
 							{
 								int nLen = memlen(pSendBuff->szData);
 
-								if ((pszBegin = (char *)memchr(pSendBuff->szData, '#', nLen)) &&(pszEnd = (char *)memchr(pSendBuff->szData, '!', nLen)))
+								pSendBuff->szData[nLen] = '\0';
+								pszBegin = pSendBuff->szData;
+								//if ((pszBegin = (char *)memchr(pSendBuff->szData, '#', nLen)) &&(pszEnd = (char *)memchr(pSendBuff->szData, '!', nLen)))
 								{
 									*pszEnd = '\0';
 

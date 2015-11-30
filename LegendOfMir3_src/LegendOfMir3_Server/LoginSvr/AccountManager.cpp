@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include "AccountManager.h"
 
 CreateSingleton(AccoutManager);
@@ -48,6 +49,6 @@ bool AccoutManager::InsertAccountUser( AccountUser*pUser )
 	{
 		 std::pair<AccountList::iterator,bool > ret = m_AccountMap.insert(std::make_pair(pUser->m_id,pUser));
 		 
-		 return ret->second;
+		 return ret.second;
 	}
 }

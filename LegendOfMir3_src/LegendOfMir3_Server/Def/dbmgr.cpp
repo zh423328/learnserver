@@ -1,5 +1,3 @@
-
-
 #include "stdafx.h"
 #include "dbmgr.h"
 #include <stdio.h>

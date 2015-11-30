@@ -26,6 +26,7 @@ public:
 	int			nServerID;
 };
 
+class AccountUser;
 class CGateInfo
 {
 public:
@@ -50,7 +51,7 @@ public:
 	void	ReceiveServerMsg(char *pszPacket);
 	void	MakeNewUser(char *pszPacket);
 
-	bool	ParseUserEntry( char *buf, _AUSERENTRYINFO *userInfo );
+	bool	ParseUserEntry( char *buf, AccountUser *userInfo );
 
 	void	ProcAddUser(SOCKET s, char *pszData);
 	void	ProcLogin(SOCKET s, char *pszData);
@@ -127,7 +128,7 @@ struct GATESERVERINFO
 typedef struct tag_TSENDBUFF
 {
 	SOCKET			sock;
-	char			szData[1024];
+	char			szData[TCP_PACKET_SIZE];
 }_TSENDBUFF, *_LPTSENDBUFF;
 
 void InsertLogMsg(UINT nID);

@@ -169,7 +169,7 @@ BEGIN
     IDS_CONNECTDB           "传奇2数据库连接。"
     IDS_LOADACCOUNTRECORDS  "用户帐户信息记录的。"
     IDS_BOUNDACCOUNTRECORDS "%d个用户帐户信息记录读出。"
-    IDS_COMPLETENEWUSER     "用户ID创建[ % s ]。"
+    IDS_COMPLETENEWUSER     "创建用户ID[ % s ]。"
 END
 
 #endif    // Chinese (Simplified, PRC) resources

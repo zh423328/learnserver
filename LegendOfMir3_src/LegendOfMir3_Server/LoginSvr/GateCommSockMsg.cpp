@@ -161,25 +161,30 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 		{
 			*(pGateInfo->ExtractPacket( szTmp ) - 1) = '\0';
 
-			switch ( szTmp[1] )
+			int nPacketHeader = PHLen;
+			switch ( szTmp[nPacketHeader+1] )
 			{
 				case '-':
 					pGateInfo->SendKeepAlivePacket();
 					break;
 				case 'A':
-					pGateInfo->ReceiveSendUser(&szTmp[2]);
+					//接收连接，和玩家数据
+					pGateInfo->ReceiveSendUser(&szTmp[nPacketHeader+2]);
 					break;
 				case 'O':
-					pGateInfo->ReceiveOpenUser(&szTmp[2]);
+					//
+					pGateInfo->ReceiveOpenUser(&szTmp[nPacketHeader+2]);
 					break;
 				case 'X':
-					pGateInfo->ReceiveCloseUser(&szTmp[2]);
+					//关闭
+					pGateInfo->ReceiveCloseUser(&szTmp[nPacketHeader+2]);
 					break;
 				case 'S':
-					pGateInfo->ReceiveServerMsg(&szTmp[2]);
+					pGateInfo->ReceiveServerMsg(&szTmp[nPacketHeader+2]);
 					break;
 				case 'M':
-					pGateInfo->MakeNewUser(&szTmp[2]);
+					//新建角色
+					pGateInfo->MakeNewUser(&szTmp[nPacketHeader+2]);
 					break;
 			}
 		}

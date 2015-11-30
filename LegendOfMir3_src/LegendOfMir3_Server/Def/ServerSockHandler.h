@@ -2,7 +2,7 @@
 #ifndef _DEFAULT_SOCKET_HANDLER
 #define _DEFAULT_SOCKET_HANDLER
 
-#define DATA_BUFSIZE 8192
+#include "../Common/Packet.h"
 
 
 //io ²Ù×÷

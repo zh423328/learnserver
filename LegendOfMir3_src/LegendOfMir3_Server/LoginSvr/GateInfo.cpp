@@ -2,6 +2,8 @@
 #include "../def/dbmgr.h"
 #include <stdio.h>
 #include "../Common/Packet.h"
+#include "../Common/DBManager.h"
+#include "AccountManager.h"
 
 extern CWHList< GAMESERVERINFO* >	g_xGameServerList;
 extern char							g_szServerList[1024];
@@ -85,7 +87,7 @@ void CGateInfo::SendToGate(SOCKET cSock, char *pszPacket)
 {
 	char	szData[256];
 
-	wsprintf(szData, _TEXT("%%%d/#%s!$"), (int)cSock, pszPacket);
+	sprintf(szData, "%%%d/#%s!$", (int)cSock, pszPacket);
 	
 	int nLen = memlen(pszPacket) - 1;
 
@@ -365,9 +367,9 @@ void CGateInfo::ProcSelectServer(SOCKET s, WORD wServerIndex)
 
    ************************************************************************************** */
 
-bool CGateInfo::ParseUserEntry( char *buf, _AUSERENTRYINFO *userInfo )
+bool CGateInfo::ParseUserEntry( char *buf, AccountUser *userInfo )
 {
-	char seps[] = "\001";
+	char seps[] = "|";
 	char *token = strtok( buf, seps );
 	int  step   = 0;
 	
@@ -377,21 +379,12 @@ bool CGateInfo::ParseUserEntry( char *buf, _AUSERENTRYINFO *userInfo )
 		{
 			switch ( step++ )
 			{
-				case 0: strcpy( userInfo->szLoginID, token );
-				case 1: strcpy( userInfo->szPassword, token ); 
-				case 2: strcpy( userInfo->szUserName, token );
-				case 3: strcpy( userInfo->szSSNo, token );
-				case 4: strcpy( userInfo->szBirthDay, token ); 
-				case 5: strcpy( userInfo->szZipCode, token );
-				case 6: strcpy( userInfo->szAddress1, token ); 
-				case 7: strcpy( userInfo->szAddress2, token );
-				case 8: strcpy( userInfo->szPhone, token ); 
-				case 9: strcpy( userInfo->szMobilePhone, token ); 
-				case 10: strcpy( userInfo->szEmail, token ); 
-				case 11: strcpy( userInfo->szQuiz, token ); 
-				case 12: strcpy( userInfo->szAnswer, token ); 
-				case 13: strcpy( userInfo->szQuiz2, token ); 
-				case 14: strcpy( userInfo->szAnswer2, token ); 
+			case 0:
+				strcpy(userInfo->m_id,token);
+				break;
+			case 1:
+				strcpy(userInfo->m_pwd,token);
+				break;
 			}	
 			
 			token = strtok( NULL, seps );
@@ -402,7 +395,7 @@ bool CGateInfo::ParseUserEntry( char *buf, _AUSERENTRYINFO *userInfo )
 		return false;
 	}
 	
-	return step >= 15;
+	return step >= 2;
 }
 
 /* **************************************************************************************
@@ -415,10 +408,12 @@ bool CGateInfo::ParseUserEntry( char *buf, _AUSERENTRYINFO *userInfo )
 
    ************************************************************************************** */
 
+//fnMakeDefMessageA 数据头
+//
 void CGateInfo::ProcAddUser(SOCKET s, char *pszData)
 {
 	char				szEntryInfo[2048];
-	_AUSERENTRYINFO		UserEntryInfo;
+	AccountUser			UserEntryInfo;
 	_TDEFAULTMESSAGE	DefMsg;
 	char				szEncodePacket[64];
 
@@ -429,62 +424,54 @@ void CGateInfo::ProcAddUser(SOCKET s, char *pszData)
 		fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
 	else
 	{	
-		char szQuery[1024];
-		sprintf( szQuery, 
-			"SELECT * FROM TBL_ACCOUNT WHERE FLD_LOGINID='%s'",
-			UserEntryInfo.szLoginID );
-
-		CRecordset *pRec = GetDBManager()->CreateRecordset();
-
-		if (!pRec->Execute( szQuery ))
-			fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
-
-		if ( pRec->Fetch() )
-			fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
+		AccountUser *pAlreadyUser = AccoutManager::GetInstance().GetAccount(UserEntryInfo.m_id);
+		if (pAlreadyUser)
+		{
+			//已经存在
+			fnMakeDefMessageA(&DefMsg, SM_NEWID_EXISTS, 0, 0, 0, 0);
+		}
 		else
 		{
-			GetDBManager()->DestroyRecordset( pRec );
+			char szQuery[1024] = {0};
+			sprintf( szQuery, "insert into Account(id,pwd) values('%s','%s')",UserEntryInfo.m_id,UserEntryInfo.m_pwd);
 
-			pRec = GetDBManager()->CreateRecordset();
+			//解析
+			db::DBServer *pServer = DBManager::GetInstance().GetFreeCon();
+			if (pServer == NULL)
+			{
+				fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
+			}
+			else
+			{
+				if (pServer->ExecuteSQL(szQuery))
+				{
+					fnMakeDefMessageA(&DefMsg, SM_NEWID_SUCCESS, 0, 0, 0, 0);
 
-			sprintf( szQuery, 
-				"INSERT TBL_ACCOUNT(FLD_LOGINID, FLD_PASSWORD, FLD_USERNAME, FLD_CERTIFICATION) "
-				"VALUES( '%s', '%s', '%s', 0 )",
-				UserEntryInfo.szLoginID, 
-				UserEntryInfo.szPassword, 
-				UserEntryInfo.szUserName );
+					AccountUser *pNewUser = new AccountUser();
+					strcpy(pNewUser->m_id,UserEntryInfo.m_id);
+					strcpy(pNewUser->m_pwd,UserEntryInfo.m_pwd);
 
-			pRec->Execute( szQuery );
-
-			sprintf( szQuery,
-				"INSERT TBL_ACCOUNTADD(FLD_LOGINID, FLD_SSNO, FLD_BIRTHDAY, FLD_ADDRESS1, FLD_ADDRESS2, "
-				                      "FLD_PHONE, FLD_MOBILEPHONE, FLD_EMAIL, FLD_QUIZ1, FLD_ANSWER1, FLD_QUIZ2, FLD_ANSWER2) "
-				"VALUES( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )",
-				UserEntryInfo.szLoginID,
-				UserEntryInfo.szSSNo,
-				UserEntryInfo.szBirthDay,
-				UserEntryInfo.szAddress1,
-				UserEntryInfo.szAddress2,
-				UserEntryInfo.szPhone,
-				UserEntryInfo.szMobilePhone,
-				UserEntryInfo.szEmail,
-				UserEntryInfo.szQuiz,
-				UserEntryInfo.szAnswer,
-				UserEntryInfo.szQuiz2,
-				UserEntryInfo.szAnswer2 );
-
-			pRec->Execute( szQuery );
-		}
-
-		GetDBManager()->DestroyRecordset( pRec );
+					AccoutManager::GetInstance().InsertAccountUser(pNewUser);
+				}
+				else
+				{
+					fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
+				}
+				DBManager::GetInstance().ReleaseCon(pServer);
 				
-		fnMakeDefMessageA(&DefMsg, SM_NEWID_SUCCESS, 0, 0, 0, 0);
-	
-		TCHAR szID[32];
-		MultiByteToWideChar( CP_ACP, 0, UserEntryInfo.szLoginID, -1, szID, sizeof( szID ) / sizeof( TCHAR ) );
-		InsertLogMsgParam(IDS_COMPLETENEWUSER, szID);
+			}
+			
+
+			fnMakeDefMessageA(&DefMsg, SM_NEWID_SUCCESS, 0, 0, 0, 0);
+
+			TCHAR szID[50];
+			MultiByteToWideChar( CP_ACP, 0, UserEntryInfo.m_id, -1, szID, sizeof( szID ) / sizeof( TCHAR ) );
+			InsertLogMsgParam(IDS_COMPLETENEWUSER, szID);
+		}
+		
 	}		
 	
+	//加密数据头
 	fnEncodeMessageA(&DefMsg, szEncodePacket, sizeof(szEncodePacket));
 	SendToGate(s, szEncodePacket);
 }

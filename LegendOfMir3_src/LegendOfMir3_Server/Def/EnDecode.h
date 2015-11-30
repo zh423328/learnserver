@@ -4,6 +4,7 @@
 
 #define _DEFBLOCKSIZE		16
 
+//第2个包头
 typedef struct tag_TDEFAULTMESSAGE
 {
 	int		nRecog;

@@ -26,6 +26,7 @@
 #define SM_PASSWD_FAIL			503
 #define SM_NEWID_SUCCESS        504
 #define SM_NEWID_FAIL           505
+#define SM_NEWID_EXISTS			506
 #define SM_PASSOK_SELECTSERVER	529
 #define SM_SELECTSERVER_OK		530
 

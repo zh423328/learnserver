@@ -5,6 +5,11 @@
 #define PACKET_H_
 #include "Common.h"
 
+//2048-sizeof(packet)
+#define TCP_PACKET_SIZE 2040 
+
+#define DATA_BUFSIZE 8192
+
 //°´1×Ö½Ú¶ÔÆë
 #pragma pack(1)
 
