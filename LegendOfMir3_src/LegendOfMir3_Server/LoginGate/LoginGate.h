@@ -61,6 +61,13 @@ public:
 		//return memchr( Buffer, '!', bufLen ) ? true : false;
 		if (bufLen >= PHLen)	//包头长度
 		{
+			Packet *pHavePacket = (Packet*)Buffer;
+			if (pHavePacket == NULL)
+				return false;
+
+			if(pHavePacket->ver != PHVer || pHavePacket->hlen != PHLen)
+				return false;
+
 			return true;
 		}
 		else
@@ -72,6 +79,9 @@ public:
 	{
 		Packet *pHavePacket = (Packet*)Buffer;
 		if (pPacket== NULL)
+			return NULL;
+
+		if(pHavePacket->ver != PHVer || pHavePacket->hlen != PHLen)
 			return NULL;
 
 		int packetLen = pHavePacket->tlen;	//包长度

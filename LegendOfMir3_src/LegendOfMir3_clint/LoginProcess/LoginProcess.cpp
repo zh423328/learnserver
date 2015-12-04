@@ -272,7 +272,7 @@ LRESULT CLoginProcess::OnLButtonUp(WPARAM wParam, LPARAM lParam)
 			}
 			case PRG_NEW_ACCOUNT:
 			{
-/*				for( i = BTN_NEW_OK_ID ; i <= BTN_NEW_QUIT_ID ; i++ )
+				for( i = BTN_NEW_OK_ID ; i <= BTN_NEW_QUIT_ID ; i++ )
 				{
 					if ( m_pBtn[i].CheckMouseOn( LOWORD( lParam ), HIWORD( lParam ) ) )
 					{
@@ -321,7 +321,7 @@ LRESULT CLoginProcess::OnLButtonUp(WPARAM wParam, LPARAM lParam)
 											}
 											else
 											{
-												//OnNewAccount();
+												OnNewAccount();
 												break;
 											}
 										}
@@ -352,7 +352,7 @@ LRESULT CLoginProcess::OnLButtonUp(WPARAM wParam, LPARAM lParam)
 						}
 					}
 					m_pBtn[i].m_nState = BUTTON_STATE_UP;
-				}*/
+				}
 			break;
 			}
 		}

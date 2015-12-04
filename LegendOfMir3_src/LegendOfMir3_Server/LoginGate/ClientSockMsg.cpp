@@ -93,7 +93,7 @@ LPARAM OnClientSockMsg(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-void SendExToServer(char *pszPacket)
+void SendExToServer(char *pszPacket,int nLen)
 {
 	//发送给loginSrv更新
 	Packet *pPacket = new Packet();
@@ -107,7 +107,9 @@ void SendExToServer(char *pszPacket)
 	DWORD	dwSendBytes;
 	WSABUF	buf;
 
-	int datalen = memlen(pszPacket) - 1;
+	//memlen(pszPacket) - 1;
+	int datalen =  nLen;// nNewLen> nLen ? nNewLen:nLen;
+
 	pPacket->tlen = pPacket->hlen + datalen;
 
 	memcpy(szMsg,pPacket,pPacket->hlen);

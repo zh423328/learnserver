@@ -9,7 +9,7 @@ extern HWND				g_hStatusBar;
 extern SOCKET			g_csock;
 extern SOCKADDR_IN		g_caddr;
 
-void					SendExToServer(char *pszPacket);
+void					SendExToServer(char *pszPacket,int nLen);
 
 BOOL					jRegGetKey(LPCTSTR pSubKeyName, LPCTSTR pValueName, LPBYTE pValue);
 
@@ -21,7 +21,7 @@ VOID WINAPI OnTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 		{
 			if (g_csock != INVALID_SOCKET)
 			{
-				SendExToServer(PACKET_KEEPALIVE);
+				SendExToServer(PACKET_KEEPALIVE,strlen(PACKET_KEEPALIVE));
 				SendMessage(g_hStatusBar, SB_SETTEXT, MAKEWORD(2, 0), (LPARAM)_TEXT("Check Activity"));
 			}
 

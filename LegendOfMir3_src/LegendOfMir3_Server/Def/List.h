@@ -142,7 +142,7 @@ template <class T>BOOL CWHList<T>::RemoveNodeByKey(SOCKET s)
 
 	while (lpNode)
 	{
-		if (((CSessionInfo*)lpNode->lpData)->sock == s)
+		if (lpNode->lpData->sock == s)
 		{
 			next = lpNode->next;
 			prev = lpNode->prev;

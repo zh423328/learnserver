@@ -254,6 +254,10 @@ void CGateInfo::ReceiveOpenUser(char *pszPacket)
 void CGateInfo::ReceiveCloseUser(char *pszPacket)
 {
 	int nSocket = AnsiStrToVal(pszPacket);
+
+	//É¾³ýuser
+
+	xUserInfoList.RemoveNodeByKey(nSocket);
 }
 
 /* **************************************************************************************

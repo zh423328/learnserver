@@ -89,7 +89,9 @@
     <ClInclude Include="DBManager.h" />
     <ClInclude Include="DBProtect.h" />
     <ClInclude Include="DBServer.h" />
+    <ClInclude Include="Encrypt.h" />
     <ClInclude Include="format.h" />
+    <ClInclude Include="md5.h" />
     <ClInclude Include="mutex.h" />
     <ClInclude Include="MysqlDB.h" />
     <ClInclude Include="Packet.h" />
@@ -99,6 +101,8 @@
     <ClInclude Include="rapidxml_iterators.hpp" />
     <ClInclude Include="rapidxml_print.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
+    <ClInclude Include="rc5\rc5.h" />
+    <ClInclude Include="rc5\rc5_locl.h" />
     <ClInclude Include="ServerConfig.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="stdafx.h" />
@@ -113,10 +117,17 @@
     <ClCompile Include="DBOperation.cpp" />
     <ClCompile Include="DBProtect.cpp" />
     <ClCompile Include="DBServer.cpp" />
+    <ClCompile Include="Encrypt.cpp" />
     <ClCompile Include="format.cpp" />
+    <ClCompile Include="md5.cpp" />
     <ClCompile Include="MySqlCmd.cpp" />
     <ClCompile Include="MysqlDB.cpp" />
     <ClCompile Include="MySqlQuery.cpp" />
+    <ClCompile Include="rc5\rc5cfb64.c" />
+    <ClCompile Include="rc5\rc5ofb64.c" />
+    <ClCompile Include="rc5\rc5_ecb.c" />
+    <ClCompile Include="rc5\rc5_enc.c" />
+    <ClCompile Include="rc5\rc5_skey.c" />
     <ClCompile Include="ServerConfig.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

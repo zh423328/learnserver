@@ -153,32 +153,32 @@ void DBTask::onReclaimObject()
 	state = thread::TPTask::TPTASK_STATE_COMPLETED;
 }
 
-//------------------------------------------------------------------------
-//ÄÚ´æ³Ø
-void * DBTask::operator new( size_t n )
-{
-	if (n == sizeof(DBTask))
-		return NULL;
-
-	return DBTask::ObjPool().createObject();
-}
-
-void DBTask::operator delete( void* ptr, size_t n )
-{
-	if( ptr == 0 )
-	{
-		assert(0);
-		return;
-	}
-
-	if( n != sizeof(DBTask) ) 
-	{
-		assert(0);
-		return;
-	}
-
-	DBTask::ObjPool().reclaimObject(static_cast<DBTask*>(ptr));
-}
+////------------------------------------------------------------------------
+////ÄÚ´æ³Ø
+//void * DBTask::operator new( size_t n )
+//{
+//	if (n == sizeof(DBTask))
+//		return NULL;
+//
+//	return DBTask::ObjPool().createObject();
+//}
+//
+//void DBTask::operator delete( void* ptr, size_t n )
+//{
+//	if( ptr == 0 )
+//	{
+//		assert(0);
+//		return;
+//	}
+//
+//	if( n != sizeof(DBTask) ) 
+//	{
+//		assert(0);
+//		return;
+//	}
+//
+//	DBTask::ObjPool().reclaimObject(static_cast<DBTask*>(ptr));
+//}
 
 //------------------------------------------------------------------------
 

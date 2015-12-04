@@ -29,6 +29,53 @@ void UpdateStatusBar(BOOL fGrow)
 	SendMessage(g_hStatusBar, SB_SETTEXT, MAKEWORD(3, 0), (LPARAM)szText);
 }
 
+/////////////////////////////////////////////////////////////////////
+// 判断客户端Socket是否已经断开，否则在一个无效的Socket上投递WSARecv操作会出现异常
+// 使用的方法是尝试向这个socket发送数据，判断这个socket调用的返回值
+// 因为如果客户端网络异常断开(例如客户端崩溃或者拔掉网线等)的时候，服务器端是无法收到客户端断开的通知的
+bool _IsSocketAlive( SOCKET s )
+{
+	int nByteSent=send(s,"",0,0);
+	if (-1 == nByteSent) return false;
+	return true;
+}
+
+
+// 显示并处理完成端口上的错误 0:错误退出，1：客户端关闭 2：服务器问题
+int HandleError(SOCKET sock,const DWORD& dwErr )
+{
+	// 如果是超时了，就再继续等吧  
+	if(WAIT_TIMEOUT == dwErr)  
+	{  	
+		// 确认客户端是否还活着...
+		if( !_IsSocketAlive( sock ) )			//send校验
+		{
+			InsertLogMsg(_TEXT("检测到客户端异常退出！"));
+			return 1;
+		}
+		else
+		{
+			InsertLogMsg( _TEXT("网络操作超时！重试中..."));
+			return 2;
+		}
+	}  
+
+	// 可能是客户端异常退出了
+	else if( ERROR_NETNAME_DELETED==dwErr )		
+	{
+		InsertLogMsg(_TEXT( "检测到客户端异常退出！"));			//客户端是关X直接退出
+		return 1;
+	}
+
+	else
+	{
+		TCHAR szMsg[1024];
+		wsprintf(szMsg,_TEXT("完成端口操作出现错误，线程退出。错误代码：%d"),dwErr);
+		InsertLogMsg(szMsg);
+		return 0;
+	}
+}
+
 BOOL InitServerThreadForMsg()
 {
 	UINT	dwThreadIDForMsg = 0;
@@ -78,10 +125,10 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 
 				int retcode = pGateInfo->Recv();
 
-				if ( (retcode == SOCKET_ERROR) && (WSAGetLastError() != WSA_IO_PENDING) )
+				if ( (retcode == SOCKET_ERROR) && (WSAGetLastError() != WSA_IO_PENDING))
 				{
 					//会接受到异常的信息
-					//closesocket(Accept);
+					closesocket(Accept);	// 触发完成端口失败消息
 					continue;
 				}
 
@@ -114,16 +161,47 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 
 	while (TRUE)
 	{
-		if ( GetQueuedCompletionStatus(
-									(HANDLE)CompletionPortID, 
-									&dwBytesTransferred, 
-									(LPDWORD)&pGateInfo, 
-									(LPOVERLAPPED *)&lpOverlapped, 
-									INFINITE) == 0 )
-		{
-			return 0;
-		}
+		BOOL bRet =  GetQueuedCompletionStatus((HANDLE)CompletionPortID, &dwBytesTransferred, (LPDWORD)&pGateInfo, (LPOVERLAPPED *)&lpOverlapped,INFINITE);
 
+		if (bRet == FALSE)
+		{
+			//如果 *lpOverlapped为空并且函数没有从完成端口取出完成包，返回值则为0。函数则不会在lpNumberOfBytes and lpCompletionKey所指向的参数中存储信息
+			if (lpOverlapped == NULL)
+				continue;
+
+			//退出
+			DWORD dwErr = GetLastError();
+
+			if (pGateInfo != NULL)
+			{
+				// 显示一下提示信息,退出返回true
+				int nRet = HandleError( pGateInfo->sock,dwErr ) ;
+				
+				//服务器错误了
+				if( nRet == 0)			
+				{
+					break;
+				}
+
+				//客户端端口连接或者网络关闭
+				if (nRet == 1)
+				{
+					//关闭客户端
+					pGateInfo->Close();
+
+					//从列表删除
+					g_xGateList.RemoveNodeByData(pGateInfo);
+
+					SAFE_DELETE(pGateInfo);
+				}
+
+			}
+
+			continue;
+		}
+		
+
+		//全部关闭
 		if (g_fTerminated)
 		{
 			PLISTNODE		pListNode;
@@ -192,6 +270,7 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 		if ( pGateInfo->Recv() == SOCKET_ERROR && WSAGetLastError() != ERROR_IO_PENDING )
 		{
 			InsertLogMsg(_TEXT("WSARecv() failed"));
+			closesocket(pGateInfo->sock);	
 			continue;
 		}
 	}

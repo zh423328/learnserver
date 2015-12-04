@@ -19,6 +19,27 @@
     <ClCompile Include="ServerConfig.cpp">
       <Filter>Config</Filter>
     </ClCompile>
+    <ClCompile Include="md5.cpp">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="Encrypt.cpp">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="rc5\rc5_ecb.c">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="rc5\rc5_enc.c">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="rc5\rc5_skey.c">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="rc5\rc5cfb64.c">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="rc5\rc5ofb64.c">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
@@ -48,6 +69,18 @@
     <ClInclude Include="Packet.h">
       <Filter>Packet</Filter>
     </ClInclude>
+    <ClInclude Include="Encrypt.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="md5.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="rc5\rc5.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="rc5\rc5_locl.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -62,6 +95,9 @@
     </Filter>
     <Filter Include="Packet">
       <UniqueIdentifier>{a13b1438-071c-4518-8020-5aa88d364669}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encrypt">
+      <UniqueIdentifier>{a3c3563a-01bb-4c8e-9e6c-d2be828beeb6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

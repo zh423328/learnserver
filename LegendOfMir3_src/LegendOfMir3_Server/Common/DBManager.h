@@ -45,8 +45,8 @@ public:
 	}
 
 	//为了内存池
-	void * operator new(size_t n);
-	void  operator delete ( void* ptr, size_t n );
+	//void * operator new(size_t n);
+	//void  operator delete ( void* ptr, size_t n );
 
 	//任务进行时
 	virtual bool process();

@@ -40,7 +40,6 @@ UINT WINAPI ThreadFuncForMsg(LPVOID lpParameter)
 								pszBegin = pSendBuff->szData;
 								//if ((pszBegin = (char *)memchr(pSendBuff->szData, '#', nLen)) &&(pszEnd = (char *)memchr(pSendBuff->szData, '!', nLen)))
 								{
-									*pszEnd = '\0';
 
 									fnDecodeMessageA(&DefaultMsg, (pszBegin + 2));	// 2 = "#?" ? = Check Code 
 
