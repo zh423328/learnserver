@@ -1,4 +1,7 @@
 #include "stdafx.h"
+#include "../Common/Common.h"
+#include "../packet/Category.h"
+#include "../packet/logingate_protocol.h"
 
 DWORD WINAPI	ThreadFuncForMsg(LPVOID lpParameter);
 
@@ -18,6 +21,8 @@ extern HWND						g_hToolBar;
 HANDLE							g_hMsgThread = INVALID_HANDLE_VALUE;
 
 CWHQueue						g_xMsgQueue;
+
+extern CRandom					g_pRandom;
 
 static char	WorkBuff[8192];
 static int	nWorkBuffLen;
@@ -93,35 +98,58 @@ LPARAM OnClientSockMsg(WPARAM wParam, LPARAM lParam)
 	return 0L;
 }
 
-void SendExToServer(char *pszPacket,int nLen)
+//logingateto
+void SendExToServer(Packet*pPacket)
 {
+	if (pPacket == NULL)
+		return;
+
+	 int nLen = pPacket->dlen;
+
+	if (nLen >= TCP_PACKET_SIZE)
+		return;
+
+	uint16 crc = g_pRandom.Random_Int(0,65535);//CrcHelper::GetCrc16(pPacket->data,nLen);
+	pPacket->crc = crc;
+
 	//发送给loginSrv更新
-	Packet *pPacket = new Packet();
-	pPacket->ver  = PHVer;
-	pPacket->hlen = PHLen;
-	
-	pPacket->tos = TOS_LOGINGATE_2_LOGINSRV;
-
-	char szMsg[DATA_BUFSIZE] = {0};
-
 	DWORD	dwSendBytes;
 	WSABUF	buf;
 
-	//memlen(pszPacket) - 1;
-	int datalen =  nLen;// nNewLen> nLen ? nNewLen:nLen;
+	buf.len = pPacket->dlen + pPacket->hlen;
+	buf.buf = (char*)pPacket;
 
-	pPacket->tlen = pPacket->hlen + datalen;
-
-	memcpy(szMsg,pPacket,pPacket->hlen);
-	memcpy(szMsg + pPacket->hlen,pszPacket,datalen);
-
-	buf.len = pPacket->tlen;
-	buf.buf = szMsg;
+	pPacket->dlen = crc ^ pPacket->dlen;
 
 	if ( WSASend(g_csock, &buf, 1, &dwSendBytes, 0, NULL, NULL) == SOCKET_ERROR )
 	{
 		int nErr = WSAGetLastError();
 	}
+}
 
-	SAFE_DELETE(pPacket);
+void SendExToServer( uint8 Category,uint8 protocol )
+{
+	BuildCmdPacketEx(pPacket,Category,protocol,buffer,64);
+
+	int nLen = pPacket->dlen;
+
+	if (nLen >= TCP_PACKET_SIZE)
+		return;
+
+	uint16 crc = g_pRandom.Random_Int(0,65535);
+	pPacket->crc = crc;
+
+	//发送给loginSrv更新
+	DWORD	dwSendBytes;
+	WSABUF	buf;
+
+	buf.len = pPacket->dlen + pPacket->hlen;
+	buf.buf = (char*)pPacket;
+
+	pPacket->dlen = crc ^ pPacket->dlen;
+
+	if ( WSASend(g_csock, &buf, 1, &dwSendBytes, 0, NULL, NULL) == SOCKET_ERROR )
+	{
+		int nErr = WSAGetLastError();
+	}
 }

@@ -1,7 +1,10 @@
 #include "stdafx.h"
-#include "../Common/Packet.h"
+#include "../Common/Common.h"
+#include "../packet/Category.h"
+#include "../packet/logingate_protocol.h"
 
-void SendExToServer(char *pszPacket,int nLen);
+void SendExToServer(Packet*pPacket);
+void SendExToServer(uint8 Category,uint8 protocol);
 
 extern SOCKET		g_ssock;
 extern SOCKET		g_csock;
@@ -118,27 +121,12 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 
 				UpdateStatusBar(TRUE);
 
-				szMsg[0] = '%';
-				szMsg[1] = 'O';
-
-				char *pszPos = ValToAnsiStr((int)Accept, &szMsg[2]);
-				
-				*pszPos++ = '/';
-
-				pszPos = ValToAnsiStr((int)Address.sin_addr.s_net, pszPos);
-				*pszPos++ = '.';
-				pszPos = ValToAnsiStr((int)Address.sin_addr.s_host, pszPos);
-				*pszPos++ = '.';
-				pszPos = ValToAnsiStr((int)Address.sin_addr.s_lh, pszPos);
-				*pszPos++ = '.';
-				pszPos = ValToAnsiStr((int)Address.sin_addr.s_impno, pszPos);
-
-				*pszPos++	= '$';
-				*pszPos		= '\0';
-
-				int nLen = pszPos - szMsg;
+				BuildPacketEx(pPacket,LOGIN_GATE,GATE2SRV_ADDSOCKET,buffer,256);
+				SET_DATA(pData,LOGIN_GATE,GATE2SRV_ADDSOCKET,pPacket);
+				pData->sock = Accept;
+				strcpy(pData->szIp,inet_ntoa(Address.sin_addr));
 				//发送给loginsrv更新
-				SendExToServer(szMsg,nLen);
+				SendExToServer(pPacket);
 			}
 		}
 	}
@@ -149,21 +137,11 @@ DWORD WINAPI AcceptThread(LPVOID lpParameter)
 //发送给loginsrv关闭
 void CloseSession(int s)
 {
-	char szMsg[32];
-
-	// Send close msg to login server
-	//wsprintf(szMsg, _TEXT("%%X%d$"), s);
-	szMsg[0] = '%';
-	szMsg[1] = 'X';
-
-	char *pszPos = ValToAnsiStr(s, &szMsg[2]);
-
-	*pszPos++	= '$';
-	*pszPos		= '\0';
-	
-	int nLen = pszPos - szMsg;
-
-	SendExToServer(szMsg,nLen); 
+	BuildPacketEx(pPacket,LOGIN_GATE,GATE2SRV_CLOSESOCKET,buffer,256);
+	SET_DATA(pData,LOGIN_GATE,GATE2SRV_CLOSESOCKET,pPacket);
+	pData->sock = s;
+	//发送给loginsrv更新
+	SendExToServer(pPacket);
 
 	closesocket(s);
 
@@ -177,9 +155,7 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 	CSessionInfo*			pSessionInfo = NULL;
 	_LPTCOMPLETIONPORT		lpPerIoData = NULL;
 
-	char					szPacket[DATA_BUFSIZE * 2];
 	char					szMsg[32] = {0};
-	char					*pszPos;
 
 	while (TRUE)
 	{
@@ -210,24 +186,9 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 				if (nRet == 1)
 				{
 					//关闭客户端
-					szMsg[0] = '%';
-					szMsg[1] = 'X';
-
-					char *pszPos = ValToAnsiStr((int)pSessionInfo->sock, &szMsg[2]);
-
-					*pszPos++	= '$';
-					*pszPos		= '\0';
-
-					int nLen = pszPos - szMsg;
-
-					SendExToServer(szMsg,nLen); 
+					CloseSession(pSessionInfo->sock);
 
 					g_xSessionList.RemoveNodeByData(pSessionInfo);
-
-					closesocket(pSessionInfo->sock);
-					pSessionInfo->sock = INVALID_SOCKET;
-
-					UpdateStatusBar(FALSE);
 
 					//GlobalFree(pSessionInfo);
 					CSessionInfo::ObjPool().reclaimObject(pSessionInfo);
@@ -244,16 +205,11 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 		//错误，关闭服务器
 		if (dwBytesTransferred == 0)
 		{
-			szMsg[0] = '%';
-			szMsg[1] = 'X';
-
-			char *pszPos = ValToAnsiStr((int)pSessionInfo->sock, &szMsg[2]);
-
-			*pszPos++	= '$';
-			*pszPos		= '\0';
-
-			int nLen = pszPos - szMsg;
-			SendExToServer(szMsg,nLen); 
+			BuildPacketEx(pPacket,LOGIN_GATE,GATE2SRV_CLOSESOCKET,buffer,64);
+			SET_DATA(pData,LOGIN_GATE,GATE2SRV_CLOSESOCKET,pPacket);
+			pData->sock = pSessionInfo->sock;
+			//发送给loginsrv更新
+			SendExToServer(pPacket);
 
 			g_xSessionList.RemoveNodeByData(pSessionInfo);
 
@@ -273,16 +229,12 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 
 		while ( pSessionInfo->HasCompletionPacket() )
 		{
-			szPacket[0]	= '%';
-			szPacket[1]	= 'A';
-			pszPos		= ValToAnsiStr( (int) pSessionInfo->sock, &szPacket[2] );
-			*pszPos++	= '/';
-			pszPos		= pSessionInfo->ExtractPacket( pszPos );
-			*pszPos++	= '$';
-			*pszPos		= '\0';
-
-			int nLen = pszPos - szPacket;
-			SendExToServer( szPacket,nLen);
+			BuildPacketEx(pPacket,LOGIN_GATE,GATE2SRV_MSG,buf,3096);
+			SET_DATA(pData,LOGIN_GATE,GATE2SRV_MSG,pPacket);
+			pData->sock = pSessionInfo->sock;
+			int nLen = pSessionInfo->ExtractPacket( pData->szPacket );
+			pPacket->dlen += nLen;
+			SendExToServer(pPacket);
 		}
 
 		// ORZ:
@@ -297,3 +249,5 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 
 	return 0;
 }
+
+

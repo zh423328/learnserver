@@ -13,6 +13,9 @@
       <UniqueIdentifier>{89a580f4-efd6-42fa-83d5-97b7253d8c63}</UniqueIdentifier>
       <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
     </Filter>
+    <Filter Include="include">
+      <UniqueIdentifier>{8c067c9d-33ea-4d96-8f38-664b57902304}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ClientSockMsg.cpp">
@@ -78,6 +81,18 @@
     </ClInclude>
     <ClInclude Include="StdAfx.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\packet\Category.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\packet\logingate_protocol.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\packet\loginsrv_protocol.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\packet\Account_protocol.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

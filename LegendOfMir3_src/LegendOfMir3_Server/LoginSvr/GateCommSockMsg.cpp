@@ -157,7 +157,7 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 	DWORD					dwBytesTransferred = 0;
 	CGateInfo*				pGateInfo = NULL;
 	LPOVERLAPPED			lpOverlapped = NULL;
-	char					szTmp[DATA_BUFSIZE];
+	char					szTmp[TCP_PACKET_SIZE + PHLen] = {0};
 
 	while (TRUE)
 	{
@@ -235,36 +235,39 @@ DWORD WINAPI ServerWorkerThread(LPVOID CompletionPortID)
 
 		pGateInfo->bufLen += dwBytesTransferred;
 
+		//接受消息
 		while ( pGateInfo->HasCompletionPacket() )
 		{
-			*(pGateInfo->ExtractPacket( szTmp ) - 1) = '\0';
+			uint32 nLen = pGateInfo->ExtractPacket(szTmp);
 
-			int nPacketHeader = PHLen;
-			switch ( szTmp[nPacketHeader+1] )
-			{
-				case '-':
-					pGateInfo->SendKeepAlivePacket();
-					break;
-				case 'A':
-					//接收连接，和玩家数据
-					pGateInfo->ReceiveSendUser(&szTmp[nPacketHeader+2]);
-					break;
-				case 'O':
-					//
-					pGateInfo->ReceiveOpenUser(&szTmp[nPacketHeader+2]);
-					break;
-				case 'X':
-					//关闭
-					pGateInfo->ReceiveCloseUser(&szTmp[nPacketHeader+2]);
-					break;
-				case 'S':
-					pGateInfo->ReceiveServerMsg(&szTmp[nPacketHeader+2]);
-					break;
-				case 'M':
-					//新建角色
-					pGateInfo->MakeNewUser(&szTmp[nPacketHeader+2]);
-					break;
-			}
+			Packet *pPacket = (Packet*)szTmp;
+			pPacket->dlen = pPacket->dlen ^ pPacket->crc;
+			pGateInfo->PacketProcess(pPacket);
+			//switch (pPacket->Category)
+			//{
+			//	case '-':
+			//		pGateInfo->SendKeepAlivePacket();
+			//		break;
+			//	case 'A':
+			//		//接收连接，和玩家数据
+			//		pGateInfo->ReceiveSendUser(szTmp);
+			//		break;
+			//	case 'O':
+			//		//
+			//		pGateInfo->ReceiveOpenUser(&szTmp[nPacketHeader+2]);
+			//		break;
+			//	case 'X':
+			//		//关闭
+			//		pGateInfo->ReceiveCloseUser(&szTmp[nPacketHeader+2]);
+			//		break;
+			//	case 'S':
+			//		pGateInfo->ReceiveServerMsg(&szTmp[nPacketHeader+2]);
+			//		break;
+			//	case 'M':
+			//		//新建角色
+			//		pGateInfo->MakeNewUser(&szTmp[nPacketHeader+2]);
+			//		break;
+			//}
 		}
 
 		if ( pGateInfo->Recv() == SOCKET_ERROR && WSAGetLastError() != ERROR_IO_PENDING )

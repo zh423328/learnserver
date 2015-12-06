@@ -64,5 +64,17 @@ public:
 	static bool	Encrypt_CRC16R( uint8* pCode, int32 nSize, uint16& wKEY_CRC);
 
 
+	//设置密钥
+	static void	SetRc6Key(uint8 *pKey,uint32 nLen);
+
+	//加密	
+	static bool Encrypt_RC6(uint8* pData,uint32 nLen);
+
+	//解密
+	static bool Decrypt_RC6(uint8* pData,uint32 nLen);
+private:
+	static uint8*	m_Key;				//密钥 0-256，常用16，24，32
+	static uint32   m_nLen;				//长度
+	static bool		m_bInitKey;			//是否初始化
 };
 #endif

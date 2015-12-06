@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Common/Packet.h"
+#include "../Common/Common.h"
 
 #define PACKET_KEEPALIVE				"%++$"
 
@@ -13,8 +13,8 @@ public:
 	SOCKET		sock;
 	TCHAR		szSockHandle[4];
 
-	TCHAR		szUserID[11];				// User ID
-	TCHAR		szAddress[20];				// User's local address 
+	char		szUserID[11];				// User ID
+	char		szAddress[20];				// User's local address 
 	
 	BYTE		btPayMode;
 	
@@ -37,31 +37,51 @@ public:
 	// For Overlapped I/O
 	OVERLAPPED				Overlapped;
 	WSABUF					DataBuf;
-	CHAR					Buffer[DATA_BUFSIZE];
-	int						bufLen;
+	char					Buffer[DATA_BUFSIZE];
+	uint32					bufLen;
 
 	CWHQueue				g_SendToGateQ;
 
 public:
 	void	SendToGate(SOCKET cSock, char *pszPacket);
 
-	void	ReceiveSendUser(char *pszPacket);
-	void	ReceiveCloseUser(char *pszPacket);
-	void	ReceiveOpenUser(char *pszPacket);
+	//发送消息
+	void	ReceiveSendUser(uint32 socket,char * szMsg,uint32 nLen);
+
+	//关闭user
+	void	ReceiveCloseUser(uint32 sock);
+
+	//添加user
+	void	ReceiveOpenUser(uint32 sock,char *szIp);
+
 	void	ReceiveServerMsg(char *pszPacket);
 	void	MakeNewUser(char *pszPacket);
 
 	bool	ParseUserEntry( char *buf, AccountUser *userInfo );
 
-	void	ProcAddUser(SOCKET s, char *pszData);
+	void	ProcAddUser(SOCKET s, char *szID,char * szPwd);
 	void	ProcLogin(SOCKET s, char *pszData);
 	void	ProcSelectServer(SOCKET s, WORD wServerIndex);
 
 	void	Close();
 	
 	void	SendToGate(char * szData,int nLen);
+
+	void	SendToGate(Packet *pPacket);
 	
-	__inline void SendKeepAlivePacket() { SendToGate(PACKET_KEEPALIVE, strlen(PACKET_KEEPALIVE)); }
+	//发送心电报
+	void	SendKeepAlivePacket();
+
+	//事件处理
+	bool	PacketProcess(Packet*pPacket);
+
+	//logingate
+	bool	LoginGateProcess(Packet*pPacket);
+	//loginsrv
+	bool	LoginSrvProcess(Packet*pPacket);
+
+	//ACCOUNT
+	bool	AccountProcess(SOCKET sock,Packet*pPacket);
 
 	CGateInfo()
 	{
@@ -93,6 +113,12 @@ public:
 			if(pHavePacket->ver != PHVer || pHavePacket->hlen != PHLen)
 				return false;
 
+			int crc		  = pHavePacket->crc;
+			int packetLen = pHavePacket->dlen ^ crc;	//包长度
+
+			if (packetLen + pHavePacket->hlen < bufLen)
+				return false;
+
 			return true;
 		}
 		else
@@ -100,7 +126,7 @@ public:
 	}
 
 	// recv 展开包
-	char * ExtractPacket( char *pPacket )
+	int ExtractPacket( char *pPacket )
 	{
 		Packet *pHavePacket = (Packet*)Buffer;
 		if (pPacket== NULL)
@@ -109,14 +135,15 @@ public:
 		if(pHavePacket->ver != PHVer || pHavePacket->hlen != PHLen)
 			return NULL;
 
-		int packetLen = pHavePacket->tlen;	//包长度
+		int crc		  = pHavePacket->crc;
+		int packetLen = pHavePacket->dlen ^ crc +  pHavePacket->hlen;	//包长度
 
 		memcpy( pPacket, Buffer, packetLen );
 
 		memmove( Buffer, Buffer + packetLen, DATA_BUFSIZE - packetLen );
 		bufLen -= packetLen;
 
-		return pPacket + packetLen;
+		return packetLen;
 	}
 };
 
@@ -139,7 +166,8 @@ struct GATESERVERINFO
 typedef struct tag_TSENDBUFF
 {
 	SOCKET			sock;
-	char			szData[TCP_PACKET_SIZE];
+	int				nLen;
+	char			szData[TCP_PACKET_SIZE+PHLen];
 }_TSENDBUFF, *_LPTSENDBUFF;
 
 void InsertLogMsg(UINT nID);

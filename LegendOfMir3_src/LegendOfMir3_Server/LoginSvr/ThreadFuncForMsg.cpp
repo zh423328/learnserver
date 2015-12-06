@@ -1,4 +1,6 @@
 #include "stdafx.h"
+#include "../Common/Common.h"
+#include "../packet/Category.h"
 
 extern HWND						g_hStatusBar;
 extern CWHList<CGateInfo*>		g_xGateList;
@@ -32,35 +34,45 @@ UINT WINAPI ThreadFuncForMsg(LPVOID lpParameter)
 						{
 							_LPTSENDBUFF pSendBuff = (_LPTSENDBUFF)pGateInfo->g_SendToGateQ.PopQ();
 
+							//ÏÈ½âÃÜ
 							if (pSendBuff)
 							{
-								int nLen = memlen(pSendBuff->szData);
+								int nLen = pSendBuff->nLen;
 
 								pSendBuff->szData[nLen] = '\0';
+
 								pszBegin = pSendBuff->szData;
-								//if ((pszBegin = (char *)memchr(pSendBuff->szData, '#', nLen)) &&(pszEnd = (char *)memchr(pSendBuff->szData, '!', nLen)))
 								{
+									//½âÃÜ
+									Packet *pPacket = (Packet*)pSendBuff->szData;
+									/*pPacket->dlen = pPacket->crc^ pPacket->dlen;*/
 
-									fnDecodeMessageA(&DefaultMsg, (pszBegin + 2));	// 2 = "#?" ? = Check Code 
-
-									switch (DefaultMsg.wIdent)
+									switch(pPacket->Category)
 									{
-										case CM_PROTOCOL:
-											break;
-										case CM_IDPASSWORD:
-											pGateInfo->ProcLogin(pSendBuff->sock, pszBegin + DEFBLOCKSIZE + 2);
-											break;
-										case CM_SELECTSERVER:
-											pGateInfo->ProcSelectServer(pSendBuff->sock, DefaultMsg.wParam);
-											break;
-										case CM_ADDNEWUSER:
-											pGateInfo->ProcAddUser(pSendBuff->sock, pszBegin + DEFBLOCKSIZE + 2);
-											break;
-										case CM_UPDATEUSER:
-											break;
-										case CM_CHANGEPASSWORD:
-											break;
+									case ACCOUNT:
+										pGateInfo->AccountProcess(pSendBuff->sock,pPacket);
+										break;
+									default:
+										break;
 									}
+									//switch (DefaultMsg.wIdent)
+									//{
+									//	case CM_PROTOCOL:
+									//		break;
+									//	case CM_IDPASSWORD:
+									//		pGateInfo->ProcLogin(pSendBuff->sock, pszBegin + DEFBLOCKSIZE + 2);
+									//		break;
+									//	case CM_SELECTSERVER:
+									//		pGateInfo->ProcSelectServer(pSendBuff->sock, DefaultMsg.wParam);
+									//		break;
+									//	case CM_ADDNEWUSER:
+									//		pGateInfo->ProcAddUser(pSendBuff->sock, pszBegin + DEFBLOCKSIZE + 2);
+									//		break;
+									//	case CM_UPDATEUSER:
+									//		break;
+									//	case CM_CHANGEPASSWORD:
+									//		break;
+									//}
 								}
 
 								delete pSendBuff;

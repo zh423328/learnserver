@@ -33,7 +33,7 @@ SOCKADDR_IN		g_caddr;
 
 BOOL			g_fTerminated = FALSE;
 
-
+CRandom			g_pRandom;	
 
 void SetFontColor()
 {
@@ -90,6 +90,8 @@ void OnCommand(WPARAM wParam, LPARAM lParam)
 
 			g_fTerminated = FALSE;
 		
+			g_pRandom.Random_Seed(0);
+
 			//³õÊ¼»¯µÈ´ýip
 			ENGINE_COMPONENT_INFO info = g_SeverConfig.getLoginGateInfo();
 			

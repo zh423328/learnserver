@@ -32,6 +32,8 @@ SOCKADDR_IN				g_gcAddr;
 
 BOOL					g_fTerminated = FALSE;
 
+extern CRandom			g_pRandom;
+
 void SwitchMenuItem(BOOL fFlag)
 {
 	HMENU hMainMenu = GetMenu(g_hMainWnd);
@@ -168,7 +170,8 @@ void OnCommand(WPARAM wParam, LPARAM lParam)
 			
 			UINT			dwThreadIDForMsg = 0;
 			unsigned long	hThreadForMsg = 0;
-			
+			g_pRandom.Random_Seed(0);
+
 			//创建一条线程
 			hThreadForMsg = _beginthreadex(NULL, 0, LoadAccountRecords, NULL, 0, &dwThreadIDForMsg);
 			

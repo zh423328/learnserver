@@ -68,6 +68,12 @@ public:
 			if(pHavePacket->ver != PHVer || pHavePacket->hlen != PHLen)
 				return false;
 
+			int crc		  = pHavePacket->crc;
+			int packetLen = pHavePacket->dlen ^ crc;	//包长度
+
+			if (packetLen + pHavePacket->hlen < bufLen)
+				return false;
+
 			return true;
 		}
 		else
@@ -75,7 +81,7 @@ public:
 	}
 
 	// recv 展开包
-	char * ExtractPacket( char *pPacket )
+	int ExtractPacket( char *pPacket )
 	{
 		Packet *pHavePacket = (Packet*)Buffer;
 		if (pPacket== NULL)
@@ -84,14 +90,15 @@ public:
 		if(pHavePacket->ver != PHVer || pHavePacket->hlen != PHLen)
 			return NULL;
 
-		int packetLen = pHavePacket->tlen;	//包长度
+		int crc		  = pHavePacket->crc;
+		int packetLen = pHavePacket->dlen ^ crc +  pHavePacket->hlen;	//包长度
 
 		memcpy( pPacket, Buffer, packetLen );
 
 		memmove( Buffer, Buffer + packetLen, DATA_BUFSIZE - packetLen );
 		bufLen -= packetLen;
 
-		return pPacket + packetLen;
+		return packetLen;
 	}
 };
 

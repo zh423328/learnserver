@@ -235,6 +235,10 @@
   <ItemGroup>
     <ClInclude Include="..\Def\DynamicArray.h" />
     <ClInclude Include="..\Def\List.h" />
+    <ClInclude Include="..\packet\Account_protocol.h" />
+    <ClInclude Include="..\packet\Category.h" />
+    <ClInclude Include="..\packet\logingate_protocol.h" />
+    <ClInclude Include="..\packet\loginsrv_protocol.h" />
     <ClInclude Include="LoginGate.h" />
     <ClInclude Include="..\Def\Misc.h" />
     <ClInclude Include="..\Def\Queue.h" />

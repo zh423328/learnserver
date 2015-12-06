@@ -3,6 +3,8 @@
 
 #include "platform.h"
 #include "format.h"
+#include "Encrypt.h"
+#include "Packet.h"
 
 #define INLINE inline
 

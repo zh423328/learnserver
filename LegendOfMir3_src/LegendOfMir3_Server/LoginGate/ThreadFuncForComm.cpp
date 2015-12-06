@@ -1,5 +1,8 @@
 #include "stdafx.h"
+#include "../Common/Common.h"
 #include "../Common/ServerConfig.h"
+#include "../packet/Category.h"
+#include "../packet/logingate_protocol.h"
 
 #define PACKET_KEEPALIVE		"%--$"
 
@@ -9,7 +12,8 @@ extern HWND				g_hStatusBar;
 extern SOCKET			g_csock;
 extern SOCKADDR_IN		g_caddr;
 
-void					SendExToServer(char *pszPacket,int nLen);
+void					SendExToServer(Packet *pPacket);
+void					SendExToServer(uint8 Category,uint8 protocol);
 
 BOOL					jRegGetKey(LPCTSTR pSubKeyName, LPCTSTR pValueName, LPBYTE pValue);
 
@@ -21,7 +25,7 @@ VOID WINAPI OnTimerProc(HWND hWnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 		{
 			if (g_csock != INVALID_SOCKET)
 			{
-				SendExToServer(PACKET_KEEPALIVE,strlen(PACKET_KEEPALIVE));
+				SendExToServer(LOGIN_GATE,GATE2SRV_KEEPALIVE);
 				SendMessage(g_hStatusBar, SB_SETTEXT, MAKEWORD(2, 0), (LPARAM)_TEXT("Check Activity"));
 			}
 

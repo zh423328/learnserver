@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------
 #include "md5.h"
 #include "Encrypt.h"
+#include "rc6/rc6.h"
 
 //crc table ----
 static uint8 crc8_table[256] = {
@@ -433,4 +434,60 @@ bool CEncrypt::Encrypt_CRC16R( uint8* pCode, int32 nSize, uint16& wKEY_CRC )
 		dwLastVal		^= xRandom.Random_Int();
 		memcpy(&pDWCode[i], &dwLastVal, nLastSize*sizeof(uint8));
 	}
+
+	return true;
 }
+
+//---------------------------------------------------------------------------
+
+
+//---------------------------------------------------------------------------
+//¼ÓÃÜ
+uint8* CEncrypt::m_Key = NULL;
+bool   CEncrypt::m_bInitKey = false;
+uint32 CEncrypt::m_nLen = 0;
+
+void CEncrypt::SetRc6Key( uint8 *pKey,uint32 nLen )
+{
+	if (m_bInitKey)
+		return;
+
+	m_bInitKey = true;
+
+	if (nLen > 256)
+		nLen = 256;
+
+	m_Key = (uint8*)malloc(sizeof(uint8)*nLen);
+
+	m_nLen = nLen;
+
+	memcpy(m_Key,pKey,nLen*sizeof(uint8));
+
+	rc6_key_setup(m_Key,nLen);
+}
+
+bool CEncrypt::Encrypt_RC6( uint8* pData,uint32 nLen )
+{
+	if (m_bInitKey == false)
+		return true;
+	else
+	{
+		rc6_encrypt(pData,nLen);
+
+		return true;
+	}
+}
+
+bool CEncrypt::Decrypt_RC6( uint8* pData,uint32 nLen )
+{
+	if (m_bInitKey == false)
+		return true;
+	else
+	{
+		rc6_decrypt(pData,nLen);
+
+		return true;
+	}
+}
+
+//---------------------------------------------------------------------------

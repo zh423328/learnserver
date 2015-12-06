@@ -25,20 +25,11 @@
     <ClCompile Include="Encrypt.cpp">
       <Filter>Encrypt</Filter>
     </ClCompile>
-    <ClCompile Include="rc5\rc5_ecb.c">
+    <ClCompile Include="rc6\rc6.cpp">
       <Filter>Encrypt</Filter>
     </ClCompile>
-    <ClCompile Include="rc5\rc5_enc.c">
-      <Filter>Encrypt</Filter>
-    </ClCompile>
-    <ClCompile Include="rc5\rc5_skey.c">
-      <Filter>Encrypt</Filter>
-    </ClCompile>
-    <ClCompile Include="rc5\rc5cfb64.c">
-      <Filter>Encrypt</Filter>
-    </ClCompile>
-    <ClCompile Include="rc5\rc5ofb64.c">
-      <Filter>Encrypt</Filter>
+    <ClCompile Include="Packet.cpp">
+      <Filter>Packet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -75,10 +66,7 @@
     <ClInclude Include="md5.h">
       <Filter>Encrypt</Filter>
     </ClInclude>
-    <ClInclude Include="rc5\rc5.h">
-      <Filter>Encrypt</Filter>
-    </ClInclude>
-    <ClInclude Include="rc5\rc5_locl.h">
+    <ClInclude Include="rc6\rc6.h">
       <Filter>Encrypt</Filter>
     </ClInclude>
   </ItemGroup>

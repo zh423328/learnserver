@@ -1,12 +1,17 @@
 #include "stdafx.h"
 #include "../def/dbmgr.h"
 #include <stdio.h>
-#include "../Common/Packet.h"
+#include "../Common/Common.h"
 #include "../Common/DBManager.h"
 #include "AccountManager.h"
+#include "../packet/Category.h"
+#include "../packet/logingate_protocol.h"
+#include "../packet/loginsrv_protocol.h"
+#include "../packet/Account_protocol.h"
 
 extern CWHList< GAMESERVERINFO* >	g_xGameServerList;
 extern char							g_szServerList[1024];
+extern CRandom						g_pRandom;
 
 int CompareDBString( char *str1, char *str2 )
 {
@@ -208,37 +213,26 @@ void CGateInfo::ReceiveServerMsg(char *pszPacket)
 	}
 }
 
-void CGateInfo::ReceiveOpenUser(char *pszPacket)
+void CGateInfo::ReceiveOpenUser(uint32 sock,char *szIp)
 {
-	char	*pszPos;
-	int		nSocket;
-	int		nLen = memlen(pszPacket);
 
-	if (pszPos = (char *)memchr(pszPacket, '/', nLen))
+	CUserInfo* pUserInfo = new CUserInfo;
+
+	if (pUserInfo)
 	{
-		nSocket = AnsiStrToVal(pszPacket);
+		pUserInfo->sock					= sock;
+		pUserInfo->nCertification		= 0;
+		pUserInfo->nClientVersion		= 0;
+		pUserInfo->fSelServerOk			= FALSE;
 
-		pszPos++;
+		strcpy(pUserInfo->szAddress,szIp);
 
-		CUserInfo* pUserInfo = new CUserInfo;
+		ZeroMemory(pUserInfo->szUserID, sizeof(pUserInfo->szUserID));
 
-		if (pUserInfo)
-		{
-			MultiByteToWideChar(CP_ACP, 0, pszPacket, -1, pUserInfo->szSockHandle, sizeof(pUserInfo->szSockHandle)/sizeof(TCHAR));
-			MultiByteToWideChar(CP_ACP, 0, pszPos, -1, pUserInfo->szAddress, sizeof(pUserInfo->szAddress)/sizeof(TCHAR));
+		xUserInfoList.AddNewNode(pUserInfo);
 
-			pUserInfo->sock					= nSocket;
-			pUserInfo->nCertification		= 0;
-			pUserInfo->nClientVersion		= 0;
-			pUserInfo->fSelServerOk			= FALSE;
-
-			ZeroMemory(pUserInfo->szUserID, sizeof(pUserInfo->szUserID));
-
-			xUserInfoList.AddNewNode(pUserInfo);
-
-			InsertLogMsgParam(IDS_OPEN_USER, pUserInfo->szAddress);
-		}
-	} 
+		InsertLogMsgParam(IDS_OPEN_USER, pUserInfo->szAddress);
+	}
 }
 
 /* **************************************************************************************
@@ -251,13 +245,11 @@ void CGateInfo::ReceiveOpenUser(char *pszPacket)
 
    ************************************************************************************** */
 
-void CGateInfo::ReceiveCloseUser(char *pszPacket)
+void CGateInfo::ReceiveCloseUser(uint32 sock)
 {
-	int nSocket = AnsiStrToVal(pszPacket);
-
 	//删除user
 
-	xUserInfoList.RemoveNodeByKey(nSocket);
+	xUserInfoList.RemoveNodeByKey(sock);
 }
 
 /* **************************************************************************************
@@ -270,26 +262,16 @@ void CGateInfo::ReceiveCloseUser(char *pszPacket)
 
    ************************************************************************************** */
 
-void CGateInfo::ReceiveSendUser(char *pszPacket)
+void CGateInfo::ReceiveSendUser(uint32 socket,char * szMsg,uint32 nLen)
 {
-	char	*pszPos;
-	int		nSocket;
-	int		nLen = memlen(pszPacket);
+	_LPTSENDBUFF lpSendUserData = new _TSENDBUFF;
+	lpSendUserData->nLen	   = nLen;
 
-	if ((pszPos = (char *)memchr(pszPacket, '/', nLen)))
-	{
-		nSocket = AnsiStrToVal(pszPacket);
+	lpSendUserData->sock		= socket;
 
-		pszPos++;
+	memmove(lpSendUserData->szData, szMsg, nLen);
 
-		_LPTSENDBUFF lpSendUserData = new _TSENDBUFF;
-
-		lpSendUserData->sock		= (SOCKET)nSocket;
-
-		memmove(lpSendUserData->szData, pszPos, memlen(pszPos));
-
-		g_SendToGateQ.PushQ((BYTE *)lpSendUserData);
-	}
+	g_SendToGateQ.PushQ((BYTE *)lpSendUserData);
 }
 
 /* **************************************************************************************
@@ -414,25 +396,27 @@ bool CGateInfo::ParseUserEntry( char *buf, AccountUser *userInfo )
 
 //fnMakeDefMessageA 数据头
 //
-void CGateInfo::ProcAddUser(SOCKET s, char *pszData)
+void CGateInfo::ProcAddUser(SOCKET s, char *szID,char * szPwd)
 {
+	if (szID == NULL || szPwd == NULL)
+		return;
+
 	char				szEntryInfo[2048];
 	AccountUser			UserEntryInfo;
 	_TDEFAULTMESSAGE	DefMsg;
 	char				szEncodePacket[64];
 
-	int len = fnDecode6BitBufA(pszData, (char *)&szEntryInfo, sizeof(szEntryInfo));
-	szEntryInfo[len] = '\0';
+	int					nRlt;
 
-	if ( !ParseUserEntry( szEntryInfo, &UserEntryInfo ) )
-		fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
+	if (strlen(szID)< 6 || strlen(szPwd) < 6 )
+		nRlt = SM_NEWID_FAIL;
 	else
 	{	
 		AccountUser *pAlreadyUser = AccoutManager::GetInstance().GetAccount(UserEntryInfo.m_id);
 		if (pAlreadyUser)
 		{
 			//已经存在
-			fnMakeDefMessageA(&DefMsg, SM_NEWID_EXISTS, 0, 0, 0, 0);
+			nRlt = SM_NEWID_EXISTS;
 		}
 		else
 		{
@@ -443,13 +427,13 @@ void CGateInfo::ProcAddUser(SOCKET s, char *pszData)
 			db::DBServer *pServer = DBManager::GetInstance().GetFreeCon();
 			if (pServer == NULL)
 			{
-				fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
+				nRlt = SM_NEWID_FAIL;
 			}
 			else
 			{
 				if (pServer->ExecuteSQL(szQuery))
 				{
-					fnMakeDefMessageA(&DefMsg, SM_NEWID_SUCCESS, 0, 0, 0, 0);
+					nRlt = SM_NEWID_SUCCESS;
 
 					AccountUser *pNewUser = new AccountUser();
 					strcpy(pNewUser->m_id,UserEntryInfo.m_id);
@@ -459,14 +443,14 @@ void CGateInfo::ProcAddUser(SOCKET s, char *pszData)
 				}
 				else
 				{
-					fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
+					nRlt = SM_NEWID_FAIL;//fnMakeDefMessageA(&DefMsg, SM_NEWID_FAIL, 0, 0, 0, 0);
 				}
 				DBManager::GetInstance().ReleaseCon(pServer);
 				
 			}
 			
 
-			fnMakeDefMessageA(&DefMsg, SM_NEWID_SUCCESS, 0, 0, 0, 0);
+			nRlt = SM_NEWID_SUCCESS;
 
 			TCHAR szID[50];
 			MultiByteToWideChar( CP_ACP, 0, UserEntryInfo.m_id, -1, szID, sizeof( szID ) / sizeof( TCHAR ) );
@@ -476,8 +460,10 @@ void CGateInfo::ProcAddUser(SOCKET s, char *pszData)
 	}		
 	
 	//加密数据头
-	fnEncodeMessageA(&DefMsg, szEncodePacket, sizeof(szEncodePacket));
-	SendToGate(s, szEncodePacket);
+	BuildPacketEx(pPacket,ACCOUNT,RES_REGISTERRLT,buf,256);
+	SET_DATA(pData,ACCOUNT,RES_REGISTERRLT,pPacket);
+	pData->nRlt = nRlt;
+	SendToGate(pPacket);
 }
 
 /* **************************************************************************************
@@ -584,31 +570,148 @@ void CGateInfo::ProcLogin(SOCKET s, char *pszData)
 void CGateInfo::SendToGate( char * szData,int nLen )
 {
 	//发送给loginSrv更新
-	Packet *pPacket = new Packet();
-	pPacket->ver  = PHVer;
-	pPacket->hlen = PHLen;
+}
 
-	pPacket->tos = TOS_LOGINSRV_2_LOGINGATE;
 
-	char szMsg[DATA_BUFSIZE] = {0};
+/************************************************************************/
+/* 发送心电包                                                                     
+*/
+/************************************************************************/
+void CGateInfo::SendKeepAlivePacket()
+{
+	BuildCmdPacketEx(pPacket,LOGIN_SRV,SRV2GATE_KEEPALIVE,buf,64);
+	SendToGate(pPacket);
+}
 
+/************************************************************************/
+/* 发送包
+*/
+/************************************************************************/
+void CGateInfo::SendToGate(Packet *pPacket)
+{
+	if (pPacket == NULL)
+		return;
+
+	int nLen = pPacket->dlen;
+
+	if (nLen >= TCP_PACKET_SIZE)
+		return;
+
+	uint16 crc = g_pRandom.Random_Int(0,65535);//CrcHelper::GetCrc16(pPacket->data,nLen);
+	pPacket->crc = crc;
+
+	//发送给loginSrv更新
 	DWORD	dwSendBytes;
 	WSABUF	buf;
 
-	int datalen = nLen;
-	pPacket->tlen = pPacket->hlen + datalen;
+	buf.len = pPacket->dlen + pPacket->hlen;
+	buf.buf = (char*)pPacket;
 
-	memcpy(szMsg,pPacket,pPacket->hlen);
-	memcpy(szMsg + pPacket->hlen,szData,datalen);
-
-	buf.len = pPacket->tlen;
-	buf.buf = szMsg;
+	pPacket->dlen = crc ^ pPacket->dlen;
 
 	if ( WSASend(sock, &buf, 1, &dwSendBytes, 0, NULL, NULL) == SOCKET_ERROR )
 	{
 		int nErr = WSAGetLastError();
 	}
-
-	SAFE_DELETE(pPacket);
 }
 
+
+bool CGateInfo::PacketProcess( Packet*pPacket )
+{
+	if (pPacket == NULL)
+		return false;
+
+	switch(pPacket->Category)
+	{
+	case LOGIN_GATE:
+		return LoginGateProcess(pPacket);
+	case LOGIN_SRV:
+		return LoginSrvProcess(pPacket);
+	default:
+		if (pPacket->Category >= CATEGORY_MAX)
+			return false;
+	}
+
+	return true;
+}
+
+
+/************************************************************************/
+/* LOGINGATE
+*/
+/************************************************************************/
+bool CGateInfo::LoginGateProcess(Packet*pPacket)
+{
+	if (pPacket == NULL)
+		return false;
+
+	switch(pPacket->Protocol)
+	{
+	case GATE2SRV_KEEPALIVE:
+		{
+			//发送心跳包
+			SendKeepAlivePacket();
+		}
+		break;
+	case GATE2SRV_ADDSOCKET:
+		{
+			SET_DATA(pData,LOGIN_GATE,GATE2SRV_ADDSOCKET,pPacket);
+			ReceiveOpenUser(pData->sock,pData->szIp);
+		}
+		break;
+	case GATE2SRV_CLOSESOCKET:
+		{
+			SET_DATA(pData,LOGIN_GATE,GATE2SRV_CLOSESOCKET,pPacket);
+			ReceiveCloseUser(pData->sock);
+		}
+		break;
+	case GATE2SRV_MSG:
+		{
+			SET_DATA(pData,LOGIN_GATE,GATE2SRV_MSG,pPacket);
+			ReceiveSendUser(pData->sock,pData->szPacket,pPacket->dlen);
+		}
+		break;
+	default:
+		if (pPacket->Category >= LOGINGATE_MAX)
+			return false;
+	}
+
+	return true;
+}
+
+/************************************************************************/
+/* LOGINSRV
+*/
+/************************************************************************/
+bool CGateInfo::LoginSrvProcess(Packet*pPacket)
+{
+	return true;
+}
+
+/************************************************************************/
+/* ACCOUNT
+*/
+/************************************************************************/
+bool CGateInfo::AccountProcess(SOCKET sock,Packet*pPacket)
+{
+	if (pPacket == NULL)
+		return false;
+
+	if (pPacket->Category != ACCOUNT)
+		return false;
+
+	switch(pPacket->Protocol)
+	{
+	case REQ_REGISTER:
+		{
+			SET_DATA(pData,ACCOUNT,REQ_REGISTER,pPacket);
+			ProcAddUser(sock,pData->szID,pData->szPwd);
+		}
+		break;
+	default:
+		if (pPacket->Category >= ACCOUNT_MAX)
+			return false;
+	}
+
+	return true;
+}

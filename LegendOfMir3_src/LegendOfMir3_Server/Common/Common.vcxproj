@@ -101,8 +101,7 @@
     <ClInclude Include="rapidxml_iterators.hpp" />
     <ClInclude Include="rapidxml_print.hpp" />
     <ClInclude Include="rapidxml_utils.hpp" />
-    <ClInclude Include="rc5\rc5.h" />
-    <ClInclude Include="rc5\rc5_locl.h" />
+    <ClInclude Include="rc6\rc6.h" />
     <ClInclude Include="ServerConfig.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="stdafx.h" />
@@ -123,11 +122,8 @@
     <ClCompile Include="MySqlCmd.cpp" />
     <ClCompile Include="MysqlDB.cpp" />
     <ClCompile Include="MySqlQuery.cpp" />
-    <ClCompile Include="rc5\rc5cfb64.c" />
-    <ClCompile Include="rc5\rc5ofb64.c" />
-    <ClCompile Include="rc5\rc5_ecb.c" />
-    <ClCompile Include="rc5\rc5_enc.c" />
-    <ClCompile Include="rc5\rc5_skey.c" />
+    <ClCompile Include="Packet.cpp" />
+    <ClCompile Include="rc6\rc6.cpp" />
     <ClCompile Include="ServerConfig.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

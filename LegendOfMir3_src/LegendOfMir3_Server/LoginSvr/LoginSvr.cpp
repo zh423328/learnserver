@@ -7,6 +7,7 @@
 #include "../Common/DBManager.h"
 #include "AccountManager.h"
 
+
 #ifdef _DEBUG
 #pragma comment(lib,"Common_d.lib")
 #else
@@ -46,6 +47,7 @@ HWND			g_hMainWnd = NULL;			// Main window handle
 HWND			g_hLogMsgWnd = NULL;
 HWND			g_hToolBar = NULL;
 HWND			g_hStatusBar = NULL;
+CRandom			g_pRandom;
 
 static WSADATA	g_wsd;
 TBBUTTON tbButtons[] = 
